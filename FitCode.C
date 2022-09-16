@@ -76,14 +76,16 @@ The naming of the root file can be changed by altering the content of line 97.
     
     comb??? is the simulation files for the respective cascade.
 */
+//angs "String" changes between "Fangs" (FIPPS ANGLE ID) and "Iangs" (IFIN ANGLE ID).
 
 TGraph* CreateHisto(
    std::string data = "./data.root",
-   std::string exp = "./exp.txt"){
+   std::string exp = "./exp.txt",std::string angs = "./Fang.txt"){
 
    TGraph2D graphexp(exp.c_str());
+   TGraph2D graphangs(angs.c_str());
 
-   auto binEdgesexp = graphexp.GetX();
+   auto binEdgesexp = graphangs.GetX();
    
    auto valuesexp = graphexp.GetY();
    
@@ -126,4 +128,3 @@ void FitCode(){
     
 
 }
-
