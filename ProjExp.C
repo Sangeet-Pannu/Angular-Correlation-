@@ -136,7 +136,6 @@ after each fit of the matrix, the fit will stop and to continue simply press "En
 */
 
 void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj=1.,bool errin = false,int nang = 50, int start = 1,int stop =50) {// Input parameter: "histogram common name", centroidal value, lower projection, high projection, number of angles
-
    std::vector<std::string> lines;
    TFile *finput = (TFile*)gDirectory->GetFile();
    std::string name_tmp1;
@@ -147,37 +146,38 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    bool filecreated = false;
 
    ofstream exp;
+
    std::ifstream input_file;
    
 
    //Gaussian Peak, with the argument being the centroid of the plot
    
    TRWPeak *p1 = new TRWPeak(cent); //Centroidal value defined by user.
-   TRWPeak *pM1 = new TRWPeak(581.064);
+   //TRWPeak *pM1 = new TRWPeak(836.6);
    //TRWPeak *pL1 = new TRWPeak(631);
    
    // Define fitter
    TPeakFitter *pf = new TPeakFitter(lowProj,highProj);
    // Adding peaks
    pf->AddPeak(p1);
-   //pf->AddPeak(pM1);
+   //pf->AddPeak(pM1);s
    //pf->AddPeak(pL1);
    
-   TRWPeak *p2 = new TRWPeak(cent); //Centroidal value defined by user.
-   TRWPeak *pM2 = new TRWPeak(815.63); //Centroidal value defined by user.
-   TRWPeak *pM3 = new TRWPeak(831.592); //Centroidal value defined by user.
-   TRWPeak *pM4 = new TRWPeak(835.88); //Centroidal value defined by user.
-   //TRWPeak *pM5 = new TRWPeak(836.509); //Centroidal value defined by user.
+   TABPeak *p2 = new TABPeak(cent); //Centroidal value defined by user.
+   TRWPeak *pM2 = new TRWPeak(804.8); //Centroidal value defined by user.
+   TRWPeak *pM3 = new TRWPeak(816.048); //Centroidal value defined by user.
+   TRWPeak *pM4 = new TRWPeak(831.649); //Centroidal value defined by user.
+   TRWPeak *pM5 = new TRWPeak(835.904); //Centroidal value defined by user.
    //TRWPeak *pM6 = new TRWPeak(711.356); //Centroidal value defined by user.
    
    // Define fitter
-   TPeakFitter *pf2 = new TPeakFitter(810,845);
+   TPeakFitter *pf2 = new TPeakFitter(550,8);
 
    // Adding peaks
    pf2->AddPeak(p2);
-   pf2->AddPeak(pM2);
-   pf2->AddPeak(pM3);
-   pf2->AddPeak(pM4);
+   //pf2->AddPeak(pM2);
+   //pf2->AddPeak(pM3);
+   //pf2->AddPeak(pM4);
    //pf2->AddPeak(pM5);
    //pf2->AddPeak(pM6);
    
@@ -196,11 +196,12 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    exp.open("exp.txt");
    }
 
-   ofstream foutup ("Updated_Fitted_spectra.root");
+   ofstream foutup ("Fitted_Spectra_Centroids.txt");
+   if(filecreated){fout << "|--------------------------------------------------------------------------------------------------------------------------------------------|"<<endl;}
+   foutup << "\t| Normal Centroid |" << " +/- " << "| Normal Centroid Error|"  << "\t|" << "\t| Mixed Centroid |" << " +/- " << "| Mixed Centroid Error|"  << "\t|" << endl;
 
-   
    if(!filecreated)fout << "Fitted Results Below" << endl;
-   if(filecreated) foutup << "Updated Fitted Results Below" << endl;
+   //if(filecreated) foutup << "Updated Fitted Results Below" << endl;
 
    //----------------------------------------------------------------------------------
    Double_t w = 600;
@@ -211,6 +212,8 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    {
          exp << 1 << endl;
          exp << 2 << endl;
+         //exp << 3 << endl;
+         //exp << 4 << endl;
    }
 
    
@@ -237,7 +240,7 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
       
             c1->Modified();
             c1->Update();
-
+	
       	   if(filecreated)  c1->WaitPrimitive(); 
             //Will wait for user to update the canvas (via the click of enter) as there is a 
             //probability that the fit has initially failed.
@@ -251,35 +254,23 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
             name_tmp2 = name_tmp2 + ".root";
       
       
-            //if(determine){ //runs once 
-            //pf2->Fit(Histomixed,"QN0"); //fits the addbackAddbackMIXED projected histograms
-            //cout << "Fixing Centroid Parameters" << endl;
-            //p2->GetFitFunction()->SetParLimits(1,615.,616.5);//For TAB3Peak
-            //cout << "Fixed 611. Centroid Parameter" << endl;
-            //pM2->GetFitFunction()->SetParLimits(1,580,582);//For TAB3Peak
-            pM2->GetFitFunction()->FixParameter(1,815.68);
-            //pM3->GetFitFunction()->FixParameter(1,598.333);
-            //pM4->GetFitFunction()->FixParameter(1,832.149);
-            //pM5->GetFitFunction()->FixParameter(1,836.304);
-            //cout << "Fixed 621. Centroid Parameter" << endl;
-            //pM3->GetFitFunction()->SetParLimits(1,815,816.2);//For TAB3Peak
-            //pM4->GetFitFunction()->SetParLimits(1,831,832);//For TAB3Peak
-            //pM5->GetFitFunction()->SetParLimits(1,835,836);//For TAB3Peak
-            //pM6->GetFitFunction()->FixParameter(1,711.356);//For TAB3Peak
-            //cout << "Fixed 611. Centroid Parameter" << endl;
-            //pM1->GetFitFunction()->SetParLimits(1,610.,612.);//For TAB3Peak
-            //cout << "Fixed 611. Centroid Parameter" << endl;
-            //pL1->GetFitFunction()->SetParLimits(1,630.,632.);//For TAB3Peak
-            //cout << "Fixed 611. Centroid Parameter" << endl;
-            //p1->GetFitFunction()->SetParLimits(1,615.,617.);//For TAB3Peak
-            //cout << "Fixed 621. Centroid Parameter" << endl;
-            //determine = false;
-            //}
+   
+            pM2->GetFitFunction()->FixParameter(1,804.8);
+            p2->GetFitFunction()->FixParameter(5,0);
+         	pM2->GetFitFunction()->FixParameter(5,0);
+         	pM3->GetFitFunction()->FixParameter(5,0);
+         	pM4->GetFitFunction()->FixParameter(5,0);
+         	//pM5->GetFitFunction()->FixParameter(5,0);
+
+            pM3->GetFitFunction()->FixParameter(1,816.048);
+            pM4->GetFitFunction()->FixParameter(1,831.649);
+         
             
             Histomixed->SetAxisRange(lowProj-50,highProj+50);
             pf2->Fit(Histomixed,"REM"); //fits the addbackAddbackMIXED projected histograms
             c1->Modified();
             c1->Update();
+          
             if(filecreated)  c1->WaitPrimitive();
       
             if(p2->GetChi2()/p2->GetNDF()>30)
@@ -302,16 +293,18 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
                fout << "addbackAddback_Projected:" << i <<"\t\t" << "addbackAddbackMixed_Projected:" << i << endl;
                if(Badfit){fout <<"---------BAD FIT---------" << endl;}
                if(BadfitMixed){fout <<"---------BAD MIXED FIT---------" << endl;}
-               if(!errin){fout << " Area:\t"<<p1->Area()<<"\t+/-\t"<<p1->AreaErr() <<"\t\t"<< " Mixed Area:\t"<<p2->Area()<<"\t+/-\t"<<p2->AreaErr()<< endl;}
+               fout << " Area:\t"<<p1->Area()<<"\t+/-\t"<<p1->AreaErr() <<"\t\t"<< " Mixed Area:\t"<<p2->Area()<<"\t+/-\t"<<p2->AreaErr()<<endl;
+               foutup << "\t| Normal Centroid |" << " +/- " << "| Normal Centroid Error\t|"  << "\t|" << " Mixed Centroid |" << " +/- " << "| Mixed Centroid Error|"  << "\t|" << endl;
+               foutup << "\t| " <<p1->Centroid() <<  "      " <<p1->CentroidErr() << "\t|" << "\t| " <<p2->Centroid() <<  "      " <<p2->CentroidErr() << "\t|" << endl;
             }
 
-            if(filecreated)
+            /*if(filecreated)
             {
                foutup << "addbackAddback_Projected:" << i <<"\t\t" << "addbackAddbackMixed_Projected:" << i << endl;
                if(Badfit){foutup <<"---------BAD FIT---------" << endl;}
                if(BadfitMixed){foutup <<"---------BAD MIXED FIT---------" << endl;}
                if(!errin){foutup << " Area:\t"<<p1->Area()<<"\t+/-\t"<<p1->AreaErr() <<"\t\t"<< " Mixed Area:\t"<<p2->Area()<<"\t+/-\t"<<p2->AreaErr()<< endl;} 
-            }   
+            }   */
                
             //----------------------------------------------------------------------------------
             double value_area = p1->Area()/p2->Area();
@@ -330,8 +323,14 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
                   }
                }  
             }else{
-               exp << i+3 <<"\t"<< value_area <<"\t"<< value_area*TMath::Sqrt( TMath::Power( (p2->AreaErr()/p2->Area()) ,2) + TMath::Power( (p1->AreaErr()/p1->Area()) ,2) ) << endl;
+            	if(!Badfit||!BadfitMixed){
+            	   	exp << i+3 <<"\t"<< value_area <<"\t"<< value_area*TMath::Sqrt( TMath::Power( (p2->AreaErr()/p2->Area()) ,2) + TMath::Power( (p1->AreaErr()/p1->Area()) ,2) ) << endl;
+            	}else{
+            		exp << i+3 <<"\t"<< "n/a" <<"\t"<< "n/a" << endl;
+            	}
             }
+            Badfit = false;
+            BadfitMixed = false;
    }
          //The writing of the updated file
             if(filecreated)
@@ -354,7 +353,11 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
 }
 
 
-void ProjSimFit(std::string name,std::string name2,float cent = 1., float lowProj=1., float highProj=1., int nang = 52, int start = 1) {// Input parameter: "histogram common name", centroidal value, lower projection, high projection, number of angles
+void ProjSimFit(std::string name,std::string name2,float cent = 1., float lowProj=1., float highProj=1., int nang = 52,    
+   /*
+   TPeak *pf = new TPeak(cent,lowProj,highProj);//Temp fitting function aside from the GRSI one.
+   TPeak *pf2 = new TPeak(cent,lowProj,highProj);//Temp fitting function aside from the GRSI one.
+   */int start = 1) {// Input parameter: "histogram common name", centroidal value, lower projection, high projection, number of angles
    
    TFile *finput = (TFile*)gDirectory->GetFile();
    std::string name_tmp1;
