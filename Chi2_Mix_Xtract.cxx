@@ -143,13 +143,15 @@ int main(){
         chi0filename << "chi_square" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
         std::string chi0name = chi0filename.str();
 
-	std::stringstream chifilename;
+	    std::stringstream chifilename;
        
         chifilename << "_"<< J1 << "-" << J2 << "-" << J3 << "_Xe126.dat";
         std::string chiname = chifilename.str();
 
         //resets the wcoeff
         float wcoeff = 0;
+        float wcoeff1 = 0;
+        float wcoeff2 = 0;
         double ChiSquare = 0;
         int cchi = 0;
         int cochi = 0;
@@ -255,7 +257,7 @@ int main(){
             double delta1;
             for (delta1 = -50.000; delta1 < 50.000; delta1 += 0.010)
             {
-                
+                //Set to zero as the second gamma goes from 2_1+ to 0_1+ which is a pure E2 transition.
                 int delta2 = 0;
                 
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
@@ -289,12 +291,17 @@ int main(){
              
                 //=============================================================================***
                 // "Normalization Coefficent"
-        wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                //wcoeff1 = SUM_{Y*W_theo/Yr^2}
+                //wcoeff2 = SUM_{W_theo^2/Yr^2}
+                //woceff = wcoeff1/wcoeff2 = UM_{Y*W_theo/Yr^2}/SUM_{W_theo^2/Yr^2}
+
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
 
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
-
+                for(int j = 0; j<loopc; j++) ChiSquare += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
                 ChiSquare = ChiSquare/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
                 //=============================================================================***     
@@ -417,17 +424,21 @@ int main(){
                 chifile << atan (delta1) << "  " << ChiSquare << std::endl;
                 
                 //=============================================================================****
-            } //==================================================================================|2|
+            } 
             
             chifile.close();        
         }
-        /*
+        //==================================================================================|2|
+
+        //find uncetainty on mixing ratio based on 1 sigma uncertainty on chi^2
         double d1;
+
         if (J1 == 1 && J2 == 2 && J3 == 0) {
             for (d1 = delmin120; d1 <= 51.000; d1 += 0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                
                 if(isIfin){
                     loopc = 0;
                     for(const auto& ang : I_angs){
@@ -448,16 +459,22 @@ int main(){
                 }
                 
                // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
                 ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
-                float chim = (c_min120 * 4 + 1) / 4;
+
+                //The chi2 with a plus one for the uncertainty.
+                float chim = (c_min120 * (loopc-1) + 1) / (loopc-1);
                 if (cc == 0 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rp120 = ChiSquare2;
@@ -471,7 +488,7 @@ int main(){
                 }
             }
             for (d1 = delmin120; d1 >= -51.000; d1 += -0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
     
@@ -495,16 +512,21 @@ int main(){
                 }
                 
                // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
                 ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
-                float chim = (c_min120 * 4 + 1) / 4;
+
+                float chim = (c_min120 * (loopc-1) + 1) /  (loopc-1);
                 if (cc == 1 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rm120 = ChiSquare2;
@@ -519,7 +541,7 @@ int main(){
             }
         }else if (J1 == 2 && J2 == 2 && J3 == 0) {
             for (d1 = delmin220; d1 <= 52.000; d1 += 0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
             
@@ -543,16 +565,20 @@ int main(){
                 }
                 
                // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
-                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
-                float chim = (c_min220 * 4 + 1) / 4;
+                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
+                float chim = (c_min220 * (loopc-1) + 1) /  (loopc-1);
                 if (cc == 2 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rp220 = ChiSquare2;
@@ -566,7 +592,7 @@ int main(){
                 }
             }
             for (d1 = delmin220; d1 >= -52.00; d1 += -0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
 
@@ -591,16 +617,21 @@ int main(){
                 }
                 
                // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
-                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
-                float chim = (c_min220 * 4 + 1) / 4;
+                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
+
+                float chim = (c_min220 *  (loopc-1) + 1) / (loopc-1);
                 if (cc == 3 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rm220 = ChiSquare2;
@@ -615,7 +646,7 @@ int main(){
             }
         }else if (J1 == 3 && J2 == 2 && J3 == 0) {
             for (d1 = delmin320; d1 <= 51.000; d1 += 0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                 
@@ -638,19 +669,23 @@ int main(){
 
                 }
                     
-               // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+              // "Normalization Coefficent"
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
-                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
+                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
               
                 
-                float chim = (c_min320 * 4 + 1) / 4;
+                float chim = (c_min320 * (loopc-1) + 1) / (loopc-1);
                 if (cc == 4 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rp320 = ChiSquare2;
@@ -664,7 +699,7 @@ int main(){
                 }
             }
             for (d1 = delmin320; d1 >= -51.000; d1 += -0.010){
-                
+                ChiSquare2 = 0;
                 float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
                 float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                 
@@ -690,17 +725,21 @@ int main(){
                 }
                 
                // "Normalization Coefficent"
-                wcoeff = 0; 
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
 
-                ChiSquare2 =0;
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
+
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare2 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
 
-                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
+                ChiSquare2 = ChiSquare2/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
 
-                float chim = (c_min320 * 4 + 1) / 4;
+                float chim = (c_min320 * (loopc-1) + 1) / (loopc-1);
                 if (cc == 5 ) {
                     if (chim <= ChiSquare2 ) {
                         chi_rm320 = ChiSquare2;
@@ -714,7 +753,7 @@ int main(){
                 }
             }
             
-        }*/
+        }
         // finishing to find uncetainty on mixing ratio based on 1 sigma uncertainty on chi^2
     
         /*
