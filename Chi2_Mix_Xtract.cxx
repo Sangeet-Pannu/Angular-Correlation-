@@ -37,14 +37,16 @@ int main(){
      
         while (std::getline(infile, lline))
         {
+
             std::stringstream ss(lline);
             float b, c;
             int a;
-                        
+            
+                    
             if (ss >> a >> b >> c)
             {
                 y[count1] = b;
-            yr[count1] = c;
+                yr[count1] = c;
             }
             count1++;
         }
@@ -113,8 +115,8 @@ int main(){
     float delmax220 = 0;
     float delmax320 = 0;
 
-    float Q2 = 1;//quenching factors
-    float Q4 = 1;
+    float Q2 = 5.07535e-01;//quenching factors
+    float Q4 = 4.80309e-01;
 
     float chi_rp120 = 0; //chi^2+1
     float chi_rp220 = 0;
@@ -249,7 +251,7 @@ int main(){
         float a22 = Q2 * R2LLJ2J1 * R2LLJ2J3;
         float a44 = Q4 * R4LLJ2J1 * R4LLJ2J3;
         
-        
+   /*     
         std::ofstream chifile (chiname);
         //==================================================================================|2|
         if (chifile.is_open())
@@ -666,7 +668,6 @@ int main(){
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
                 }
                     
               // "Normalization Coefficent"
@@ -753,18 +754,15 @@ int main(){
                 }
             }
             
-        }
+        }*/
         // finishing to find uncetainty on mixing ratio based on 1 sigma uncertainty on chi^2
     
-        /*
+        
         //===================================================================================[4]
         std::ofstream chi0file (chi0name);
         if (chi0file.is_open())
         {
-            
-            
-            
-            
+
             if(isIfin){
                     loopc = 0;
                     for(const auto& ang : I_angs){
@@ -783,13 +781,17 @@ int main(){
                     }
 
                 }
-                wcoeff = 0; 
-               // "Normalization Coefficent"
-                for(int i = 0; i<=loopc; i++) wcoeff +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                wcoeff1 = 0; 
+                wcoeff2 = 0;
+
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeff = wcoeff1/wcoeff2;
 
                 // "Calculation of Chi2/NDF value"
-                for(int j = 0; j<=loopc; j++) ChiSquare_0 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
-
+   
+                for(int j = 0; j<loopc; j++) ChiSquare_0 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
                 ChiSquare_0 = ChiSquare_0/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
                 
@@ -836,7 +838,7 @@ int main(){
            
         }//===================================================================================[4]
         chi0file.close();   
-        */
+        
         /*
         // finishing to find uncetainty on mixing ratio based on 1 sigma uncertainty on chi^2
 
@@ -874,12 +876,12 @@ int main(){
             //std::cout << "Uncertiant of delta is + (" << drp320 - delmin320 << ")" << std::endl;
             //std::cout << "Minimum delta value is (" << delmin320 << ")" << std::endl;
             //std::cout << "Uncertiant of delta is - (" << drm320 - delmin320 << ")" << std::endl;
-        }else {
+        }else {*/
             std::cout << "Minimum chi square value at 0 mixing is " << chi_min0 << std::endl;
             std::cout << "Delta value at minimum chi square is " << 0 << std::endl;
             std::cout << "Maximum chi square value at 0 mixing is " << chi_max0 << std::endl;
             std::cout << "Delta value at maximum chi square is " << 0 << std::endl;
-        }*/
+       // }
 
     }//=========================================================================================================|J|
             
