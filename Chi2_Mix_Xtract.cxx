@@ -187,12 +187,12 @@ int main(){
     //==========================================================================================================|J|
     for (int J1 = 0; J1 < 5; J1++)
     {
-	
-    	std::stringstream chi0filename;
+    
+        std::stringstream chi0filename;
         chi0filename << "chi_square" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
         std::string chi0name = chi0filename.str();
 
-	    std::stringstream chifilename;
+        std::stringstream chifilename;
        
         chifilename << "chi_square" << "_"<< J1 << "-" << J2 << "-" << J3 << "_Ru100.dat";
         std::string chiname = chifilename.str();
@@ -931,7 +931,7 @@ int main(){
        }
 
          std::stringstream conflev95filename;
-        conflev95filename << "confidencelev95_8pi_Ru100.dat";
+        conflev95filename << "confidencelev95_Ru100.dat";
         std::string conflevname = conflev95filename.str();
         
         std::ofstream cvfile (conflevname);
@@ -1198,6 +1198,7 @@ int main(){
         bfilebash << "s5 errorbar color 1" << std::endl;
         
         bfilebash << "s0 legend \"0-2-0 (\\xd\\0=0)\"" << std::endl;
+
         if (c_min120 <= chi_min) {
             bfilebash << "s1 legend \"1-2-0 (\\xd\\0=" << delmin120 << "\\S+" << drp120-delmin120 << "\\N" << "\\s" << round((drm120-delmin120) * pow(10, 2))/pow(10, 2) << "\\N)\"" << std::endl;
         }else{
@@ -1214,237 +1215,32 @@ int main(){
             bfilebash << "s3 legend \"3-2-0 (\\xd\\0=" << round(delmin320 * pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
         }
         bfilebash << "s4 legend \"4-2-0 (\\xd\\0=0)\"" << std::endl;
-        bfilebash << "s5 legend \"exp " << peak << " keV\"" << std::endl;
-        if (peak == 1073){
-            bfilebash << "legend 0.55, 0.77" << std::endl;
-        }else if (peak == 1421||peak==1630||peak==1698||peak == 2445){
-            bfilebash << "legend 0.50, 0.77" << std::endl;
-        }else if (peak==1822||peak == 1904||peak==2004||peak==2130||peak==2421||peak == 2537||peak == 2658||peak == 2747||peak == 2809||peak == 2892||peak == 603||peak == 686){
-            bfilebash << "legend 0.49, 0.77" << std::endl;
-        }else{
-            bfilebash << "legend 0.51, 0.77" << std::endl;
-        }
-        bfilebash << "legend char size 1.2" << std::endl;
+
+        bfilebash << "s5 legend \"exp " << peak << " keV\"" << std::endl; //EXPERIMENT PEAK keV
+
         
-        if (peak == 818||peak==306){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 1.00, 0.65" << std::endl;
-            bfilebash << "string char size 1.8" << std::endl;
-            bfilebash << "string def \"2\\s2\\N\\S+\"" << std::endl;
-        }else if (peak == 1073||peak==873){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 1.00, 0.65" << std::endl;
-            bfilebash << "string char size 1.8" << std::endl;
-            bfilebash << "string def \"0\\s3\\N\\S+\"" << std::endl;
-        }else if (peak == 1126||peak==873){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.95, 0.65" << std::endl;
-            bfilebash << "string char size 1.8" << std::endl;
-            bfilebash << "string def \"2\\s3\\N\\S+\"" << std::endl;
-        }else if (peak == 1421||peak==873){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.90, 0.65" << std::endl;
-            bfilebash << "string char size 1.8" << std::endl;
-            bfilebash << "string def \"2\\S+\\N(3\\S-\\N)\"" << std::endl;
-        }else if (peak == 1505||peak==873){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 1.00, 0.65" << std::endl;
-            bfilebash << "string char size 1.8" << std::endl;
-            bfilebash << "string def \"(1,3)\\S+\\N(3\\S+\\N)\"" << std::endl;
-        }else if (peak == 884){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.9, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2-4)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 1630){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.9, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-4)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 1698){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.9, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-4)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak==1822){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.9, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1,3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 1904){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.9, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2-4)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 2004){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-3)\\S+\\N(0\\S+\\N)\"" << std::endl;
-        }else if (peak == 2130){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2-4)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2212){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2,3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2318){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2,3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2421){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1,3)\\S+\\N(1\\S+\\N)\"" << std::endl;
-        }else if (peak == 2445){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.95, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"2\\S+\"" << std::endl;
-        }else if (peak == 2537){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1,2)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2658){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2,3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2747){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2809){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2,3)\\S+\\N(2\\S+\\N)\"" << std::endl;
-        }else if (peak == 2892){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.95, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 603){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-4)\\S+\\N(0\\S+\\N)\"" << std::endl;
-        }else if (peak == 686){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1,3)\\S+\\N(3\\S+\\N)\"" << std::endl;
-        }else if (peak == 744){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.91, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(2-4)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 774){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-4)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 1085){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.89, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"(1-4)\\S+\\N(4\\S+\\N)\"" << std::endl;
-        }else if (peak == 1186){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.95, 0.65" << std::endl;
-            bfilebash << "string char size 1.6" << std::endl;
-            bfilebash << "string def \"0\\S+\"" << std::endl;
-        }
-        if (peak ==1073||peak==884||peak == 1126||peak==818||peak==1421||peak==1505||peak==1630||peak==1698||peak==1822||peak== 1904||peak==2004||peak==2130||peak == 2212||peak == 2318||peak == 2421||peak == 2445||peak == 2537||peak == 2658||peak == 2747||peak == 2809||peak == 2892){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.48, 0.44" << std::endl;
-            bfilebash << "string char size 1.3" << std::endl;
-            bfilebash << "string def \"gated on 658 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
-        }else if (peak == 603||peak == 686||peak == 744||peak == 774||peak == 1085||peak == 1186){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.45, 0.44" << std::endl;
-            bfilebash << "string char size 1.3" << std::endl;
-            bfilebash << "string def \"gated on 1476 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
-        }else if (peak == 2678){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.55, 0.43" << std::endl;
-            bfilebash << "string char size 1.3" << std::endl;
-            bfilebash << "string def \"gated on 331 keV \\xg\\0 ray\"" << std::endl;
-        }else if (peak == 306||peak==873||peak==945||peak==1377||peak==1461||peak==1652||peak==1997||peak==1799||peak==371||peak==560||peak==652||peak==1039||peak == 1421||peak==1486||peak == 1811||peak == 1836||peak == 1886||peak==1223||peak == 1736){
-            bfilebash << "with string" << std::endl;
-            bfilebash << "string on" << std::endl;
-            bfilebash << "string loctype view" << std::endl;
-            bfilebash << "string 0.55, 0.44" << std::endl;
-            bfilebash << "string char size 1.3" << std::endl;
-            bfilebash << "string def \"gated on 843 keV \\xg\\0 ray\"" << std::endl;
-        }
+
+        //------------LEGEND CONFIGURATIONS---------------|
+        bfilebash << "legend 0.49, 0.77" << std::endl;
+        bfilebash << "legend char size 1.2" << std::endl;
+
+        //------------------------------------------------|
+        
+        
+        bfilebash << "with string" << std::endl;
+        bfilebash << "string on" << std::endl;
+        bfilebash << "string loctype view" << std::endl;
+        bfilebash << "string 0.89, 0.65" << std::endl;
+        bfilebash << "string char size 1.6" << std::endl;
+        bfilebash << "string def \"(1-3)\\S+\\N(0\\S+\\N)\"" << std::endl;
+        
+        bfilebash << "with string" << std::endl;
+        bfilebash << "string on" << std::endl;
+        bfilebash << "string loctype view" << std::endl;
+        bfilebash << "string 0.48, 0.44" << std::endl;
+        bfilebash << "string char size 1.3" << std::endl;
+        bfilebash << "string def \"gated on 658 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
+       
         bfilebash << "xaxis label \"Cos(\\xq\\0) \"" << std::endl;
         bfilebash << "xaxis label char size 1.6" << std::endl;
         bfilebash << "xaxis ticklabel char size 1.6" << std::endl;
@@ -1546,86 +1342,12 @@ int main(){
     
     float yminchi=0;
     float ymaxchi=0;
-    if (peak == 818 || peak == 2324 || peak == 2683 || peak == 1811){
-        yminchi= 0.098 * chi_min;
-        ymaxchi= 4 * chi_max;
-    }else if (peak == 884 || peak == 2348 || peak == 2399){
-        yminchi= 0.1 * chi_min;
-        ymaxchi= 5.0 * chi_max;
-    }else if (peak == 1126 || peak == 1421){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 1505){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 6.0 * chi_max;
-    }else if (peak == 1630){
-        yminchi= 0.05 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 1698){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 1822){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 1904){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2004){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2130){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2212){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2318){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2421){
-        yminchi= 0.4 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2445){
-        yminchi= 0.1 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2658){
-        yminchi= 0.1 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2747){
-        yminchi= 0.1 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2809){
-        yminchi= 0.3 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 2892){
-        yminchi= 0.1 * chi_min;
-        ymaxchi= 2.5 * chi_max;
-    }else if (peak == 603){
-        yminchi= 0.2 * chi_min;
-        ymaxchi= 2.5 * chi_max;
-    }else if (peak == 686){
-        yminchi= 0.4 * chi_min;
-        ymaxchi= 4.0 * chi_max;
-    }else if (peak == 744){
-        yminchi= 0.4 * chi_min;
-        ymaxchi= 4.5 * chi_max;
-    }else if (peak == 774){
-        yminchi= 0.5 * chi_min;
-        ymaxchi= 4.5 * chi_max;
-    }else if (peak == 1085){
-        yminchi= 0.5 * chi_min;
-        ymaxchi= 4.5 * chi_max;
-    }else if (peak == 1186){
-        yminchi= 0.6 * chi_min;
-        ymaxchi= 1.5 * chi_max;
-    }else{
-        //yminchi= 0.5 * chi_min;
-        yminchi= 0.15 * chi_min;
-        ymaxchi= 2.0 * chi_max;
-    }
+
+    yminchi= 0.3 * chi_min;
+    ymaxchi= 4.0 * chi_max;
+   
     
     std::stringstream Chi;
-    //Chi << Output2 << "Chiscript" << peak << ".bfile";//script file includes xmgrace Chi Square plots
     Chi << "Chiscript" << ".bfile";//script file includes xmgrace Chi Square plots
     std::string bfileChi = Chi.str();
     std::ofstream bfilebashChi(bfileChi);
@@ -1637,7 +1359,7 @@ int main(){
         bfilebashChi << "read xy \"chi_square" << "_2-2-0_Ru100.dat\"" << std::endl;
         bfilebashChi << "read xy \"chi_square" << "_3-2-0_Ru100.dat\"" << std::endl;
         bfilebashChi << "read xy \"chi_square" << "_4-2-0_delta_0_Ru100.dat\"" << std::endl;
-        bfilebashChi << "read xy \"confidencelev95_8pi_Ru100.dat\"" << std::endl;
+        bfilebashChi << "read xy \"confidencelev95_Ru100.dat\"" << std::endl;
         
         bfilebashChi << "s0 symbol 1" << std::endl;
         bfilebashChi << "s0 linestyle 0" << std::endl;
@@ -1664,183 +1386,39 @@ int main(){
         bfilebashChi << "s5 line color 1" << std::endl;
         bfilebashChi << "s5 line linewidth 1.5" << std::endl;
         
-        if (peak == 884 || peak == 1698 ||peak == 1822||peak == 1904||peak == 2130||peak == 2212||peak == 2658||peak == 2809||peak==744||peak == 1085) {
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak == 1186) {
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak == 1630||peak==652||peak == 2004||peak == 2445||peak == 2537||peak == 2747||peak == 2892||peak == 603||peak == 774) {
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak == 1514 || peak == 1933 || peak == 2604||peak == 1836||peak==1716){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else if (peak == 883 || peak == 1126 || peak == 1421||peak == 2318){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else if (peak == 2399){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak==1505){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-        }else if (peak==2421||peak == 686){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else if (peak == 1385||peak==2199){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-        }else if (peak == 1457 || peak == 1380 ){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak == 2324 || peak == 2780 || peak == 2848||peak==2839){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else if (peak == 873 || peak == 945|| peak == 1891 || peak == 1973|| peak==2162 ){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else if (peak == 1073 || peak == 0000){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-        }else if (peak == 818){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-        }else if (peak==2962){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-        }else if (peak == 1799){
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
-        }else{
-            bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
-            bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-            bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 0))/pow(10, 0) << ")\"" << std::endl;
-        }
-        if (peak == 497 || peak == 884 || peak == 1126  || peak == 1421||peak==1630||peak == 2747||peak == 2809){
-            bfilebashChi << "legend 0.25, 0.43" << std::endl;
-        }else if (peak==1822||peak==1904||peak == 2004||peak == 2130||peak == 2212||peak == 2318||peak == 2445||peak == 2537||peak == 2658||peak==744||peak == 1085){
-            bfilebashChi << "legend 0.20, 0.43" << std::endl;
-        }else if (peak==1186){
-            bfilebashChi << "legend 0.30, 0.43" << std::endl;
-        }else if (peak==1505){
-            bfilebashChi << "legend 0.89, 0.43" << std::endl;
-        }else if (atan (delta_min) * 180 / PI > 30) {
-            bfilebashChi << "legend 0.20, 0.43" << std::endl;
-        }else{
-            bfilebashChi << "legend 0.90, 0.43" << std::endl;
-        }
+        
+        bfilebashChi << "s0 legend \"0-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min020*pow(10, 1))/pow(10, 1) << ")\"" << std::endl;
+        bfilebashChi << "s1 legend \"1-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min120*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        bfilebashChi << "s2 legend \"2-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min220*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        bfilebashChi << "s3 legend \"3-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min320*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        bfilebashChi << "s4 legend \"4-2-0 (\\xc\\0\\S2\\N/\\xn=" << round(c_min420*pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        
+        
         bfilebashChi << "legend char size 1.2" << std::endl;
         
         bfilebashChi << "with string" << std::endl;
         bfilebashChi << "string on" << std::endl;
         bfilebashChi << "string loctype view" << std::endl;
-        if (peak == 2010 || peak == 2324 || peak == 2399 || peak == 2476 || peak == 2683|| peak == 1514) {
-            bfilebashChi << "string 0.65, 0.65" << std::endl;
-        }else if (peak == 1505){
-            bfilebashChi << "string 0.5, 0.2" << std::endl;
-        }else if (peak == 1164|| peak == 1933||peak==1486){
-            bfilebashChi << "string 0.65, 0.2" << std::endl;
-        }else if (peak == 1822||peak == 2004||peak == 603||peak == 774){
-            bfilebashChi << "string 0.75, 0.2" << std::endl;
-        }else if (peak == 884||peak == 1126 || peak == 1421||peak==1630||peak == 1698||peak == 1904||peak == 2130||peak == 2212||peak == 2318||peak == 2445||peak == 2537||peak == 2658||peak == 2747||peak == 2809||peak==744||peak == 1085||peak==1186){
-            bfilebashChi << "string 0.95, 0.2" << std::endl;
-        }else if (peak == 1223){
-            bfilebashChi << "string 0.45, 0.2" << std::endl;
-        }else if (peak ==2180){
-            bfilebashChi << "string 0.3, 0.2" << std::endl;
-        }else{
-            bfilebashChi << "string 0.35, 0.2" << std::endl;
-        }
-        bfilebashChi << "string char size 1.3" << std::endl;
-        bfilebashChi << "string def \"" << peak << " keV \\xg\\0 ray\"" << std::endl;
         
-    bfilebashChi << "with string" << std::endl;
+
+        bfilebashChi << "string 0.75, 0.2" << std::endl;
+        bfilebashChi << "string char size 1.3" << std::endl;
+        bfilebashChi << "string def \"" << peak << " keV \\xg\\0 ray\"" << std::endl; //PEAK GAMMA
+        
+        bfilebashChi << "with string" << std::endl;
         bfilebashChi << "string on" << std::endl;
         bfilebashChi << "string loctype view" << std::endl;
         bfilebashChi << "string 0.1, 0.23" << std::endl;
         bfilebashChi << "string char size 1.3" << std::endl;
         bfilebashChi << "string def \"95\%\"" << std::endl;
         
-        if (peak == 1073 || peak == 884||peak==818||peak==1126||peak == 1421||peak == 1505||peak == 1630||peak == 1698||peak == 1822||peak == 1904||peak == 2004||peak == 2130||peak == 2212||peak == 2318||peak==2421||peak == 2445||peak == 2537||peak == 2658||peak == 2747||peak == 2809||peak == 2892){
-            bfilebashChi << "with string" << std::endl;
-            bfilebashChi << "string on" << std::endl;
-            bfilebashChi << "string loctype view" << std::endl;
-            bfilebashChi << "string 0.5, 0.74" << std::endl;
-            bfilebashChi << "string char size 1.3" << std::endl;
-            bfilebashChi << "string def \"gated on 539 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
-        }else if (peak == 603 || peak == 686||peak==744||peak == 774||peak == 1085||peak==1186){
-            bfilebashChi << "with string" << std::endl;
-            bfilebashChi << "string on" << std::endl;
-            bfilebashChi << "string loctype view" << std::endl;
-            bfilebashChi << "string 0.50, 0.74" << std::endl;
-            bfilebashChi << "string char size 1.3" << std::endl;
-            bfilebashChi << "string def \"gated on 1476 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
-        }else if (peak == 883){
-            bfilebashChi << "with string" << std::endl;
-            bfilebashChi << "string on" << std::endl;
-            bfilebashChi << "string loctype view" << std::endl;
-            bfilebashChi << "string 0.7, 0.2" << std::endl;
-            bfilebashChi << "string char size 1.3" << std::endl;
-            bfilebashChi << "string def \"gated on 331 keV \\xg\\0 ray\"" << std::endl;
-        }else if (peak==2962||peak == 2323||peak==1487){
-            bfilebashChi << "with string" << std::endl;
-            bfilebashChi << "string on" << std::endl;
-            bfilebashChi << "string loctype view" << std::endl;
-            bfilebashChi << "string 0.56, 0.68" << std::endl;
-            bfilebashChi << "string char size 1.3" << std::endl;
-            bfilebashChi << "string def \"gated on 331 keV \\xg\\0 ray\"" << std::endl;
-        }
+        bfilebashChi << "with string" << std::endl;
+        bfilebashChi << "string on" << std::endl;
+        bfilebashChi << "string loctype view" << std::endl;
+        bfilebashChi << "string 0.5, 0.74" << std::endl;
+        bfilebashChi << "string char size 1.3" << std::endl;
+        bfilebashChi << "string def \"gated on 539 keV \\xg\\0 ray (Ru-100)\"" << std::endl; //CHANGE EXPERIMENTAL
+       
         
         bfilebashChi << "xaxis label \"arctan(\\xd\\0), deg.\"" << std::endl;
         bfilebashChi << "xaxis label char size 1.6" << std::endl;
