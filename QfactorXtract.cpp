@@ -40,7 +40,7 @@ int main(){
 
     float Wtheo[29];
     float Wtheo_0[29];
-
+    int loopc;
     int J2 = 2, J3 = 0;
    
     float chi_min0 = 0;
