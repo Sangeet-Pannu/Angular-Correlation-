@@ -50,7 +50,8 @@ void ProjExp(std::string name, float lowProj, float highProj, float lowBGProj = 
    TH1D *projBG2 =new TH1D("projBG2","projBG2",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
 
    TH1D *projMixed =new TH1D("projMixed","projMixed",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
-;
+	projBG->Sumw2();
+	projMixed->Sumw2();
    std::cout << std::endl << "Start to project and export " << nang << " " << name <<"-like matrixes:" << std::endl << std::endl;
    std::cout << "   Low projection limit = " << lowProj << std::endl;
    std::cout << "   High projection limit = " << highProj << std::endl;
@@ -116,6 +117,88 @@ void ProjExp(std::string name, float lowProj, float highProj, float lowBGProj = 
 
 }
 
+int j = 4;
+
+double GausNmodel(double *x,double* par){
+
+	double f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[0])/par[2],2) ));
+
+	double gaus1 = par[1]*(f1);
+
+    	double sumfunc = gaus1;
+
+/*
+	for(int i = 3; i<=(2*j); i+=2)
+    	{
+    	f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[i])/par[2],2) ));
+    
+    	// Total peak
+    	gaus1 = par[i+1]*f1;
+    
+    	sumfunc += gaus1;
+    
+    	}
+*/
+	//588
+	f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[3])/par[2],2) ));
+    
+    	// Total peak
+    	gaus1 = par[1]*(0.53/2.61)*f1;
+    	
+    	sumfunc += gaus1;
+
+	//580
+	f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[4])/par[2],2) ));
+    
+    	// Total peak
+    	gaus1 = par[1]*(0.363/2.61)*f1;
+    	
+    	sumfunc += gaus1;
+    	
+    	//596
+    	f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[5])/par[2],2) ));
+    
+    	// Total peak
+    	gaus1 = par[1]*(0.22/2.61)*f1;
+    	
+    	sumfunc += gaus1;
+
+	//4
+	f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[6])/par[2],2) ));
+    
+    	// Total peak
+    	gaus1 = par[1]*(0.68/2.61)*f1;
+    	
+    	sumfunc += gaus1;
+
+	return sumfunc;
+}
+
+double background(double *x,double* par){
+    return (par[0]*x[0]) + par[1];
+}
+
+double FitFunction(double *x,double* par){
+
+    return background(x,par) + GausNmodel(x,&par[2]);//&par[2] because two parameters are given to the BK function
+    
+}
+
+double GausNmodelDRAW(double *x,double* par){
+
+	double f1 = ( 1/(sqrt(2*TMath::Pi())* par[2]) ) * exp( -0.5*( TMath::Power((x[0]-par[0])/par[2],2) ));
+
+	double gaus1 = par[1]*(f1);
+
+    	return gaus1;
+    	}
+
+double FitFunctionDRAW(double *x,double* par){
+
+    return background(x,par) + GausNmodelDRAW(x,&par[2]);//&par[2] because two parameters are given to the BK function
+    
+}
+
 /*
 ProjFit:
 
@@ -134,6 +217,239 @@ nang: number of angles
 
 after each fit of the matrix, the fit will stop and to continue simply press "Enter". THis is to view the fit.
 */
+//BELOW is a fitting of GAUSSIAN + BK
+/*
+void GausFit(std::string name="SuppressedggAC_IFIN", float cent = 1., float lowProj1=575, float highProj1=605) {// Input
+	 TCanvas *c1 = new TCanvas("c1","c1",200,10,800,600);
+	ofstream exp;
+	std::vector<std::string> lines;
+   	TFile *finput = (TFile*)gDirectory->GetFile();
+   	std::string name_tmp1;
+   	std::string name_tmp2;
+
+	TF1 *fitfunc = new TF1("fitfunc",FitFunction,lowProj1,highProj1,5); 
+	TF1 *fitfunc1 = new TF1("fitfunc1",FitFunction,lowProj1,highProj1,5); 	
+	
+	fitfunc->SetParName(0,"BK Slope");
+	fitfunc->SetParName(1,"BK Y-Intercept");
+	fitfunc->SetParName(2,"Centroid 1");
+	fitfunc->SetParName(3,"Area 1");
+	fitfunc->SetParName(4,"Sigma");
+	
+	fitfunc1->SetParName(0,"BK Slope");
+	fitfunc1->SetParName(1,"BK Y-Intercept");
+	fitfunc1->SetParName(2,"Centroid 1");
+	fitfunc1->SetParName(3,"Area 1");
+	fitfunc1->SetParName(4,"Sigma");
+	
+	
+   	exp.open("exp.txt");
+   	
+   	fitfunc->SetParameter(0,1);
+	fitfunc->SetParameter(1,1); // Background offset
+	
+	
+	fitfunc->SetParameter(2,cent); // Centroid 1st peak
+	fitfunc->SetParameter(3,3000); // Centroid 1st peak
+	fitfunc->SetParameter(4,1.2); // Sigma
+	
+	fitfunc1->SetParameter(0,1);
+	fitfunc1->SetParameter(1,1); // Background offset
+	
+	
+	fitfunc1->SetParameter(2,cent); // Centroid 1st peak
+	fitfunc1->SetParameter(3,3000); // Centroid 1st peak
+	fitfunc1->SetParameter(4,1.2); // Sigma
+   	
+   	for(int i=0;i<31;i++){ // nang are the total number of angles in experiment.  //SKIPS THE 0 DEGREE ANGLE!!!
+   
+         
+            std::cout << "\nHistogram: " << name <<  i <<"\n"<< std::endl;
+            //----------------------------------------------------------------------------------
+               
+            name_tmp1=name+std::to_string(i);
+            TH1D *Histo = (TH1D*)finput->Get(name_tmp1.c_str()); // Opens each Histogram in the Spectra.root file given.
+               
+            name_tmp2 = name+"Mixed"+std::to_string(i);
+            TH1D *Histomixed = (TH1D*)finput->Get(name_tmp2.c_str());
+               
+            //----------------------------------------------------------------------------------
+            
+         
+            //----------------------------------------------------------------------------------
+            name_tmp1 = name_tmp1 + ".root";
+           
+            Histo->SetAxisRange(lowProj1-5,highProj1+5);
+     
+            Histo->Fit("fitfunc","REM");//fits the addbackAddback projected histogram
+      	    c1->WaitPrimitive(); 
+            c1->Modified();
+            c1->Update();
+	
+      	 
+            //Will wait for user to update the canvas (via the click of enter) as there is a 
+            //probability that the fit has initially failed.
+    
+
+            name_tmp2 = name_tmp2 + ".root";
+      	
+      	
+            Histomixed->SetAxisRange(lowProj1-5,highProj1+5);
+            Histomixed->Fit("fitfunc1","REM"); //fits the addbackAddbackMIXED projected histograms
+            c1->WaitPrimitive(); 
+            c1->Modified();
+            c1->Update();
+          
+
+
+
+            //----------------------------------------------------------------------------------
+            
+               
+            //----------------------------------------------------------------------------------
+            float sqrtred1 = fitfunc->GetChisquare()/fitfunc->GetNDF();
+            float sqrtred2 = fitfunc1->GetChisquare()/fitfunc1->GetNDF();
+          
+              
+               exp << i+3 <<"\t"<< fitfunc->GetParameter(3)/fitfunc1->GetParameter(3) <<"\t"<< fitfunc->GetParameter(3)/fitfunc1->GetParameter(3)*TMath::Sqrt( TMath::Power( (fitfunc1->GetParError(3)/fitfunc1->GetParameter(3)) ,2) + TMath::Power( (fitfunc->GetParError(3)/fitfunc->GetParameter(3)) ,2) ) << endl;
+               }
+ 	
+}
+*/
+
+void GausNFit(std::string name="SuppressedggAC_IFIN", float cent = 1., float lowProj1=575, float highProj1=605) {// Input
+	 TCanvas *c1 = new TCanvas("c1","c1",200,10,800,600);
+	float highBGProj = 554.48;
+	float lowBGProj = 575.605;
+	
+	float highProj = 547.856;
+	float lowProj = 526.731;
+
+	TFile *finput = (TFile*)gDirectory->GetFile();
+	TH2F *matrix = (TH2F*)finput->Get(name.c_str());
+	matrix->Sumw2();
+	TH1D *Histo =new TH1D("Histo","Histo",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
+	Histo->Sumw2();
+	TH1D *projBG =new TH1D("projBG","projBG",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
+	projBG->Sumw2();
+	
+	std::string name_tmp=name+"BG"; 
+      	TH2F *matrixBG = (TH2F*)finput->Get(name_tmp.c_str());// Gets the name+i background histogram.
+	
+	
+   
+      	matrix->ProjectionX("Histo",matrix->GetXaxis()->FindBin(lowProj),matrix->GetXaxis()->FindBin(highProj));
+   
+        matrix->ProjectionX("projBG",matrix->GetXaxis()->FindBin(lowBGProj),matrix->GetXaxis()->FindBin(highBGProj));//Makes a projection of the background around 
+         
+         
+        Histo->Add(projBG,-1*((highProj-lowProj)/(highBGProj-lowBGProj)));
+     
+	
+	TF1 *fitfunc = new TF1("fitfunc",FitFunction,lowProj1,highProj1,9); 
+	
+	fitfunc->SetParName(0,"BK Slope");
+	fitfunc->SetParName(1,"BK Y-Intercept");
+	fitfunc->SetParName(2,"Centroid 1");
+	fitfunc->SetParName(3,"Area 1");
+	fitfunc->SetParName(4,"Sigma");
+	fitfunc->SetParName(5,"Centroid 2");
+	//fitfunc->SetParName(6,"Area 2");
+	fitfunc->SetParName(6,"Centroid 3");
+	//fitfunc->SetParName(8,"Area 3");
+	fitfunc->SetParName(7,"Centroid 4");
+	//fitfunc->SetParName(10,"Area 4");
+	fitfunc->SetParName(8,"Centroid 5");
+	//fitfunc->SetParName(12,"Area 5");
+	
+	fitfunc->SetParameter(0,1);
+	fitfunc->SetParameter(1,1); // Background offset
+	
+	
+	fitfunc->FixParameter(2,590.765); // Centroid 1st peak
+	fitfunc->FixParameter(5,588.47); // Centroid 1st peak
+	fitfunc->FixParameter(6,580.600); // Centroid 1st peak
+	fitfunc->FixParameter(7,596.01); // Centroid 1st peak
+	fitfunc->FixParameter(8,598.19); // Centroid 1st peak
+	
+	fitfunc->SetParameter(3,5000); // Amplitude 1st peak
+	/*
+	fitfunc->SetParameter(6,500); // Amplitude 1st peak
+	fitfunc->SetParameter(8,500); // Amplitude 1st peak
+	fitfunc->SetParameter(10,500); // Amplitude 1st peak
+	fitfunc->SetParameter(12,500); // Amplitude 1st peak
+	*/
+	fitfunc->SetParameter(4,1.2); // Sigma
+	Histo->Draw("h");
+
+	Histo->Fit("fitfunc","REM");
+	Double_t par[7];
+	
+	double par1 = fitfunc->GetParameter(0);
+    	double par2 = fitfunc->GetParameter(1);
+    	
+    	par[0]=fitfunc->GetParameter(2);//Cent1
+    	par[1]=fitfunc->GetParameter(3);//AREA1
+    	par[2]=fitfunc->GetParameter(4);//Sigma1
+    	par[3]=fitfunc->GetParameter(5);//Cent2
+    	par[4]=fitfunc->GetParameter(6);//Cent3
+    	par[5]=fitfunc->GetParameter(7);//Cent4
+    	par[6]=fitfunc->GetParameter(8);//Cent5
+	
+	TF1 *bkfunc = new TF1("bkfunc",background,lowProj1,highProj1,2);
+    	bkfunc->SetParameter(0,par1);
+    	bkfunc->SetParameter(1,par2);
+    	bkfunc->SetLineColor(kBlack);
+   	bkfunc->Draw("SAME");
+
+	TF1 *SG1 = new TF1("SG1",FitFunctionDRAW,lowProj1,highProj1,5);
+   	SG1->SetParameter(0,par1);
+    	SG1->SetParameter(1,par2);
+    	SG1->SetParameter(2,par[0]);
+    	SG1->SetParameter(3,par[1]);
+    	SG1->SetParameter(4,par[2]);
+    	SG1->SetLineColor(kGreen);
+    	SG1->Draw("SAME");
+    	
+    	TF1 * func_draw = new TF1("func_draw",FitFunctionDRAW,lowProj1,highProj1,5);
+    	func_draw->SetParameter(0,par1);
+    	func_draw->SetParameter(1,par2);
+    	func_draw->SetParameter(2,par[3]);
+    	func_draw->SetParameter(3,par[1]*(0.53/2.61));
+    	func_draw->SetParameter(4,par[2]);
+    	func_draw->SetLineColor(kBlue);
+    	func_draw->Draw("SAME");
+    	
+    	TF1 * func_draw1 = new TF1("func_draw1",FitFunctionDRAW,lowProj1,highProj1,5);
+    	func_draw1->SetParameter(0,par1);
+    	func_draw1->SetParameter(1,par2);
+    	func_draw1->SetParameter(2,par[4]);
+    	func_draw1->SetParameter(3,par[1]*(0.363/2.61));
+    	func_draw1->SetParameter(4,par[2]);
+    	func_draw1->SetLineColor(kOrange);
+    	func_draw1->Draw("SAME");
+    	
+    	TF1 * func_draw2 = new TF1("func_draw2",FitFunctionDRAW,lowProj1,highProj1,5);
+    	func_draw2->SetParameter(0,par1);
+    	func_draw2->SetParameter(1,par2);
+    	func_draw2->SetParameter(2,par[5]);
+    	func_draw2->SetParameter(3,par[1]*(0.22/2.61));
+    	func_draw2->SetParameter(4,par[2]);
+    	func_draw2->SetLineColor(kPink);
+    	func_draw2->Draw("SAME");
+    	
+    	TF1 * func_draw3 = new TF1("func_draw3",FitFunctionDRAW,lowProj1,highProj1,5);
+    	func_draw3->SetParameter(0,par1);
+    	func_draw3->SetParameter(1,par2);
+    	func_draw3->SetParameter(2,par[6]);
+    	func_draw3->SetParameter(3,par[1]*(0.68/2.61));
+    	func_draw3->SetParameter(4,par[2]);
+    	func_draw3->SetLineColor(kCyan);
+    	func_draw3->Draw("SAME");
+    	
+    	
+}
+
 
 void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj=1.,bool errin = false,int nang = 50, int start = 1,int stop =50) {// Input parameter: "histogram common name", centroidal value, lower projection, high projection, number of angles
    std::vector<std::string> lines;
@@ -153,25 +469,27 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    //Gaussian Peak, with the argument being the centroid of the plot
    
    TRWPeak *p1 = new TRWPeak(cent); //Centroidal value defined by user.
-   //TRWPeak *pM1 = new TRWPeak(836.6);
-   //TRWPeak *pL1 = new TRWPeak(631);
+   //TRWPeak *pM1 = new TRWPeak(677);
+   //TRWPeak *pL1 = new TRWPeak(699);
+   //TRWPeak *pK1 = new TRWPeak(702);
    
    // Define fitter
    TPeakFitter *pf = new TPeakFitter(lowProj,highProj);
    // Adding peaks
    pf->AddPeak(p1);
-   //pf->AddPeak(pM1);s
+   //pf->AddPeak(pM1);
    //pf->AddPeak(pL1);
+   //pf->AddPeak(pK1);
    
-   TABPeak *p2 = new TABPeak(cent); //Centroidal value defined by user.
-   TRWPeak *pM2 = new TRWPeak(804.8); //Centroidal value defined by user.
-   TRWPeak *pM3 = new TRWPeak(816.048); //Centroidal value defined by user.
-   TRWPeak *pM4 = new TRWPeak(831.649); //Centroidal value defined by user.
-   TRWPeak *pM5 = new TRWPeak(835.904); //Centroidal value defined by user.
+   TRWPeak *p2 = new TRWPeak(cent); //Centroidal value defined by user.
+   //TRWPeak *pM2 = new TRWPeak(677); //Centroidal value defined by user.
+   //TRWPeak *pM3 = new TRWPeak(699); //Centroidal value defined by user.
+   //TRWPeak *pM4 = new TRWPeak(702); //Centroidal value defined by user.
+   //TRWPeak *pM5 = new TRWPeak(835.904); //Centroidal value defined by user.
    //TRWPeak *pM6 = new TRWPeak(711.356); //Centroidal value defined by user.
    
    // Define fitter
-   TPeakFitter *pf2 = new TPeakFitter(550,8);
+   TPeakFitter *pf2 = new TPeakFitter(lowProj,highProj);
 
    // Adding peaks
    pf2->AddPeak(p2);
@@ -221,7 +539,7 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    for(int i=start;i<stop;i++){ // nang are the total number of angles in experiment.  //SKIPS THE 0 DEGREE ANGLE!!!
    
          
-            std::cout << "Histogram: " << name <<  i << std::endl;
+            std::cout << "\nHistogram: " << name <<  i <<"\n"<< std::endl;
             //----------------------------------------------------------------------------------
                
             name_tmp1=name+std::to_string(i);
@@ -235,7 +553,11 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
          
             //----------------------------------------------------------------------------------
             name_tmp1 = name_tmp1 + ".root";
-            Histo->SetAxisRange(lowProj-50,highProj+50);
+           
+            Histo->SetAxisRange(lowProj-5,highProj+5);
+            //p1->GetFitFunction()->FixParameter(5,0);
+            //p1->GetFitFunction()->SetParLimits(5,538.5,540);
+            
             pf->Fit(Histo,"REM");//fits the addbackAddback projected histogram
       
             c1->Modified();
@@ -252,21 +574,21 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
             }
 
             name_tmp2 = name_tmp2 + ".root";
-      
-      
-   
-            pM2->GetFitFunction()->FixParameter(1,804.8);
-            p2->GetFitFunction()->FixParameter(5,0);
-         	pM2->GetFitFunction()->FixParameter(5,0);
-         	pM3->GetFitFunction()->FixParameter(5,0);
-         	pM4->GetFitFunction()->FixParameter(5,0);
+      	
+      		//p2->GetFitFunction()->FixParameter(5,0);
+   	
+             //pM2->GetFitFunction()->SetParLimits(1,545,551);
+               // p2->GetFitFunction()->SetParLimits(5,0.1,10);
+         	//pM2->GetFitFunction()->FixParameter(5,0);
+         	//pM3->GetFitFunction()->FixParameter(5,0);
+         	//pM4->GetFitFunction()->FixParameter(5,0);
          	//pM5->GetFitFunction()->FixParameter(5,0);
 
-            pM3->GetFitFunction()->FixParameter(1,816.048);
-            pM4->GetFitFunction()->FixParameter(1,831.649);
+            //pM3->GetFitFunction()->FixParameter(1,816.048);
+            //pM4->GetFitFunction()->FixParameter(1,831.649);
          
             
-            Histomixed->SetAxisRange(lowProj-50,highProj+50);
+            Histomixed->SetAxisRange(lowProj-5,highProj+5);
             pf2->Fit(Histomixed,"REM"); //fits the addbackAddbackMIXED projected histograms
             c1->Modified();
             c1->Update();
@@ -298,13 +620,13 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
                foutup << "\t| " <<p1->Centroid() <<  "      " <<p1->CentroidErr() << "\t|" << "\t| " <<p2->Centroid() <<  "      " <<p2->CentroidErr() << "\t|" << endl;
             }
 
-            /*if(filecreated)
+            if(filecreated)
             {
-               foutup << "addbackAddback_Projected:" << i <<"\t\t" << "addbackAddbackMixed_Projected:" << i << endl;
-               if(Badfit){foutup <<"---------BAD FIT---------" << endl;}
-               if(BadfitMixed){foutup <<"---------BAD MIXED FIT---------" << endl;}
-               if(!errin){foutup << " Area:\t"<<p1->Area()<<"\t+/-\t"<<p1->AreaErr() <<"\t\t"<< " Mixed Area:\t"<<p2->Area()<<"\t+/-\t"<<p2->AreaErr()<< endl;} 
-            }   */
+               fout << "addbackAddback_Projected:" << i <<"\t\t" << "addbackAddbackMixed_Projected:" << i << endl;
+               if(Badfit){fout <<"---------BAD FIT---------" << endl;}
+               if(BadfitMixed){fout <<"---------BAD MIXED FIT---------" << endl;}
+               fout << " Area:\t"<<p1->Area()<<"\t+/-\t"<<p1->AreaErr() <<"\t\t"<< " Mixed Area:\t"<<p2->Area()<<"\t+/-\t"<<p2->AreaErr()<< endl;
+            }   
                
             //----------------------------------------------------------------------------------
             double value_area = p1->Area()/p2->Area();
@@ -514,5 +836,4 @@ void ProjSimFit(std::string name,std::string name2,float cent = 1., float lowPro
    maps.close();
    //----------------------------------------------------------------------------------
 }
-
 
