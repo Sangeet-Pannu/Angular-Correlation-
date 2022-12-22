@@ -29,11 +29,11 @@ float Wtheo[29];
 float y[29];
 float yr[29];
 
-int J1=4; // change this for whatever spin it is.
+int J1=2; // change this for whatever spin it is.
 int J2=2;
 int J3=0;
 
-float delta1 = 0;
+float delta1 = 3.7;
 float delta2 = 0;
 
 float A2;
@@ -53,6 +53,7 @@ float R4LMJ2J3 = 0;
 float R4MMJ2J3 = 0;
 
 //=================================================================+|
+void Coefficient_Set(){
 if (J1 == 1 && J2 == 2 && J3 == 0) {
         R2LLJ2J1 = 0.4183;
         R2LMJ2J1 = 0.9354;
@@ -119,7 +120,10 @@ if (J1 == 1 && J2 == 2 && J3 == 0) {
                 R4LMJ2J3 = 0.0;
                 R4MMJ2J3 = 0.0;
             
-            }                    
+            }else{
+                cout << "Some Thing Went Wrong!" << endl;
+            }                
+}
 //=================================================================+|
 
 /*
@@ -198,6 +202,9 @@ double AngCorFunction_M3(double *x,double* par)
 
 void FitCode(){
     //Uses the exp file to create a graph which will be used to fit the angular correlation results on.
+
+    Coefficient_Set();
+
     auto c1 = new TCanvas("c1", "Angular Distribution With Using SAMBU");
     c1->Divide(2,1);
     c1->cd(1);
