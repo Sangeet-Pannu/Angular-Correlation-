@@ -6,7 +6,19 @@
 #include "TFile.h"
 #include "TMath.h"
 #include "RooMath.h"
-
+#include <TROOT.h>
+#include <TFile.h>
+#include <string>
+#include <stdio.h>
+#include <TH1.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TLegend.h>
+#include <TGraph.h>
+#include "TGraphErrors.h"
+#include "TFrame.h"
+#include "TF1.h"
+#include "TTree.h"
 
 /*
 SOFTWARE: 112 COULEX DATA FITTING FUNCTION.
@@ -25,48 +37,35 @@ yield a high degree of variablity when fitting the skewed tail feature.
 
  // additional peaks to be added to system besides groundstate.
 
+float Wtheo[29];
+float y[29];
+float yr[29];
+
+int J1=4; // change this for whatever spin it is.
+int J2=2;
+int J3=0;
+
+float delta1 = 0;
+float delta2 = 0;
+
+float A2;
+float A4;
+
+float R2LLJ2J1 = 0;
+float R2LMJ2J1 = 0;
+float R2MMJ2J1 = 0;
+float R2LLJ2J3 = 0;
+float R2LMJ2J3 = 0;
+float R2MMJ2J3 = 0;
+float R4LLJ2J1 = 0;
+float R4LMJ2J1 = 0;
+float R4MMJ2J1 = 0;
+float R4LLJ2J3 = 0;
+float R4LMJ2J3 = 0;
+float R4MMJ2J3 = 0;
+                      
 
 
-
-//W(theta) = 1 + a_2*P_2(cos(theta)) + a_4*P_4(cos(theta))
-
-double AngCorFunction(double *x,double* par)
-{
-	double rad = x[0];   
-	double Pl2 = (1.0/2.0)*(3*pow(rad,2)-1);
-	double Pl4 = (1.0/8)*(35*pow(rad,4)-30*pow(rad,2)+3);	
-	return (1 + par[2]*par[0]*Pl2+par[1]*par[3]*Pl4)+par[4];
-
-}
-
-
-
-
-/*
-TH1* OpenFile() Function's functionality is opening ascii files and writing them to
-.root files via TFile *file = new TFile().
-
-To change ascii file, simply remove pre-existing file in "in.open()" and place the specific ascii 
-file to be read in the brackets.
-
-The naming of the root file can be changed by altering the content of line 97.
-*/
-
-// WANT TO CREATE A GRAPH OF SCATTER POINTS NOT A 1D HISTOGRAM.
-   
-#include <TROOT.h>
-#include <TFile.h>
-#include <string>
-#include <stdio.h>
-#include <TH1.h>
-#include <TStyle.h>
-#include <TCanvas.h>
-#include <TLegend.h>
-#include <TGraph.h>
-#include "TGraphErrors.h"
-#include "TFrame.h"
-#include "TF1.h"
-#include "TTree.h"
 /*
     data.root is the output file for which the histograms will be written to
     for the next setup of the analysis of angular correlations.
@@ -80,7 +79,7 @@ The naming of the root file can be changed by altering the content of line 97.
 
 TGraph* CreateHisto(
    std::string data = "./data.root",
-   std::string exp = "./exp.txt",std::string angs = "./Fang.txt"){
+   std::string exp = "./Normexp.txt",std::string angs = "/home/Sangeet/Master_project/100Ru-Data/Angular_Correlations/Fangs.txt"){
 
    TGraph2D graphexp(exp.c_str());
    TGraph2D graphangs(angs.c_str());
@@ -93,38 +92,226 @@ TGraph* CreateHisto(
 
    auto histexp = new TGraphErrors(graphexp.GetN()-1,binEdgesexp,valuesexp,nullptr,errorexp);
 
+
+   for(int j =0; j<graphexp.GetN();j++){
+   	y[j] = valuesexp[j];
+   	yr[j] = errorexp[j];
+   }
+
+ 
    return histexp;
 
 }
 
 
+   
+
+
+
+// implementing a simple normalization.
+double AngCorFunction_M1(double *x,double* par)
+{
+	double rad = x[0];   
+	double Pl2 = (1.0/2.0)*(3.*pow(rad,2)-1.);
+	double Pl4 = (1.0/8.0)*(35.*pow(rad,4)-30.*pow(rad,2)+3.);
+
+	return (par[4])*(1 + par[2]*par[0]*Pl2+ par[3]*par[1]*Pl4);
+
+}
+
+//implementing Sambu's method
+double AngCorFunction_M2(double *x,double* par)
+{   
+    R2LLJ2J1 = -0.1707;
+                R2LMJ2J1 = -0.5051;
+                R2MMJ2J1 = 0.4482;
+                R2LLJ2J3 = -0.5976;
+                R2LMJ2J3 = 0.0;
+                R2MMJ2J3 = 0.0;
+                R4LLJ2J1 = -0.0085;
+                R4LMJ2J1 = 0.0627;
+                R4MMJ2J1 = -0.0297;
+                R4LLJ2J3 = -1.0690;
+                R4LMJ2J3 = 0.0;
+                R4MMJ2J3 = 0.0;
+    
+
+    double rad = x[0];   
+    double Pl2 = (1.0/2.0)*(3*pow(rad,2)-1);
+    double Pl4 = (1.0/8)*(35*pow(rad,4)-30*pow(rad,2)+3);
+
+    //?-2-0 Any with mixing ratios
+  
+    float a2 = ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+    float a4 = ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+
+    double theo_W = (1 + par[0]*a2*Pl2+ par[1]*a4*Pl4);
+    
+    return theo_W;
+
+}
+
+//All cascades other than 0-2-0
+double AngCorFunction_M3(double *x,double* par)
+{
+    if (J1 == 1 && J2 == 2 && J3 == 0) {
+        R2LLJ2J1 = 0.4183;
+        R2LMJ2J1 = 0.9354;
+        R2MMJ2J1 = -0.2988;
+        R2LLJ2J3 = -0.5976;
+        R2LMJ2J3 = 0.0;
+        R2MMJ2J3 = 0.0;
+        R4LLJ2J1 = 0.0;
+        R4LMJ2J1 = 0.0;
+        R4MMJ2J1 = 0.7127;
+        R4LLJ2J3 = -1.0690;
+        R4LMJ2J3 = 0.0;
+        R4MMJ2J3 = 0.0;
+    }else if (J1 == 2 && J2 == 2 && J3 == 0) {
+        R2LLJ2J1 = -0.4183;
+        R2LMJ2J1 = 0.6124;
+        R2MMJ2J1 = 0.1281;
+        R2LLJ2J3 = -0.5976;
+        R2LMJ2J3 = 0.0;
+        R2MMJ2J3 = 0.0;
+        R4LLJ2J1 = 0.0;
+        R4LMJ2J1 = 0.0;
+        R4MMJ2J1 = -0.3064;
+        R4LLJ2J3 = -1.0690;
+        R4LMJ2J3 = 0.0;
+        R4MMJ2J3 = 0.0;
+        }else if (J1 == 3 && J2 == 2 && J3 == 0) {
+            R2LLJ2J1 = 0.1195;
+            R2LMJ2J1 = -0.6547;
+            R2MMJ2J1 = 0.3415;
+            R2LLJ2J3 = -0.5976;
+            R2LMJ2J3 = 0.0;
+            R2MMJ2J3 = 0.0;
+            R4LLJ2J1 = 0.0;
+            R4LMJ2J1 = 0.0;
+            R4MMJ2J1 = 0.0764;
+            R4LLJ2J3 = -1.0690;
+            R4LMJ2J3 = 0.0;
+            R4MMJ2J3 = 0.0;
+            }else if (J1 == 4 && J2 == 2 && J3 == 0) {
+                R2LLJ2J1 = -0.1707;
+                R2LMJ2J1 = -0.5051;
+                R2MMJ2J1 = 0.4482;
+                R2LLJ2J3 = -0.5976;
+                R2LMJ2J3 = 0.0;
+                R2MMJ2J3 = 0.0;
+                R4LLJ2J1 = -0.0085;
+                R4LMJ2J1 = 0.0627;
+                R4MMJ2J1 = -0.0297;
+                R4LLJ2J3 = -1.0690;
+                R4LMJ2J3 = 0.0;
+                R4MMJ2J3 = 0.0;
+            }else if (J1 == 0 && J2 == 2 && J3 == 0){
+                R2LLJ2J1 = -0.5976;
+                R2LMJ2J1 = 0.0;
+                R2MMJ2J1 = 0.0;
+                R2LLJ2J3 = -0.5976;
+                R2LMJ2J3 = 0.0;
+                R2MMJ2J3 = 0.0;
+                R4LLJ2J1 = -1.0690;
+                R4LMJ2J1 = -0.0;
+                R4MMJ2J1 = -0.0;
+                R4LLJ2J3 = -1.0690;
+                R4LMJ2J3 = 0.0;
+                R4MMJ2J3 = 0.0;
+            
+            }
+
+    double rad = x[0];   
+    double Pl2 = (1.0/2.0)*(3*pow(rad,2)-1);
+    double Pl4 = (1.0/8)*(35*pow(rad,4)-30*pow(rad,2)+3);
+
+    //?-2-0 Any with mixing ratios
+  
+    float a2 = ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+    float a4 = ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+
+    double theo_W = (1 + a2*Pl2+a4*Pl4);
+    
+    return theo_W;
+
+}
+
 
 
 void FitCode(){
     //Uses the exp file to create a graph which will be used to fit the angular correlation results on.
-    //auto c1 = new TCanvas("c1", "Fit spectrum with Residual plot");
+    auto c1 = new TCanvas("c1", "Angular Distribution of FIPPS SAMBU");
+    //auto c2 = new TCanvas("c2", "Angular Distribution",1000,500);
+    c1->Divide(2,1);
+    c1->cd(1);
+
     TGraph* fhist = CreateHisto();
+    TGraph* fhist1 = CreateHisto();
+    
     fhist->SetMarkerColor(kBlue);
     fhist->SetMarkerStyle(kFullCircle);
+
+    fhist1->SetMarkerColor(kGreen);
+    fhist1->SetMarkerStyle(kFullCircle);
+
+    
+    TF1 *fitfunc = new TF1("fitfunc",AngCorFunction_M2,-1,1,2);
+
+    //Below for when we are looking at cascades other than 0-2-0.
+    //TF1 *fitfunc = new TF1("fitfunc",AngCorFunction_M3,-1,1,2);
+
+    fitfunc->SetParName(0,"Q2");
+    fitfunc->SetParName(1,"Q4");
+
+    fitfunc->SetParameter(0,0.8); // Background slope
+    fitfunc->SetParameter(1,0.8);
+    fitfunc->SetParLimits(0,0.1,1);
+    fitfunc->SetParLimits(1,0.1,1);
+
+    fhist->Fit("fitfunc","REM");
+    cout << "|**----------FIT FINISHED for SAMBU METHOD----------**|"<< endl;
+    cout << "Ch1_2/NDF= " << fitfunc->GetChisquare()/fitfunc->GetNDF() << endl;
+
+    cout << "\nQ2 = " << fitfunc->GetParameter(0) <<" +/- "<< fitfunc->GetParError(0) << endl;
+    cout << "Q4 = " << fitfunc->GetParameter(1) <<" +/- "<< fitfunc->GetParError(1) << endl;
+    fhist->SetTitle("Angular Distribution of FIPPS SAMBU");
+    fhist->Draw("AP");
     
 
-    TF1 *fitfunc = new TF1("fitfunc",AngCorFunction,-1,1,5); 
+    c1->cd(2);
+    cout << "\n" << endl;
 
-    fitfunc->SetParName(2,"Q2");
-    fitfunc->SetParName(3,"Q4");
-   
+    TF1 *fitfunc1 = new TF1("fitfunc1",AngCorFunction_M1,-1,1,5);
 
-    fitfunc->FixParameter(0,0.3571428571428571); // Background slope
-    fitfunc->FixParameter(1,1.1428571428571415); // Background offset 
-    fitfunc->FixParameter(2,0.8); // Background slope
-    fitfunc->FixParameter(3,0.6);
-   // fitfunc->SetParLimits(0,0,10);
-    // fitfunc->SetParLimits(1,0,10);
-    fhist->Fit("fitfunc","REM");
-    fhist->Draw("AP");
+    fitfunc1->SetParName(0,"a2");
+    fitfunc1->SetParName(1,"a4");
+    fitfunc1->SetParName(2,"Q2");
+    fitfunc1->SetParName(3,"Q4");
+    fitfunc1->SetParName(4,"Norm C");   
+
+    fitfunc1->FixParameter(0,0.1020408163265306); // Background slope
+    fitfunc1->FixParameter(1,0.009070294784580489); // Background offset 
+    fitfunc1->SetParameter(2,0.9); // Background slope
+    fitfunc1->SetParameter(3,0.6);
+    fitfunc1->SetParLimits(3,0.1,1);
+    fitfunc1->SetParLimits(2,0.1,1);
+    fitfunc1->SetParameter(4,1);
+
+    fhist1->Fit("fitfunc1","REM");
+    cout << "|**----------FIT FINISHED for NORM C METHOD----------**|"<< endl;
+    cout << "Ch1_2/NDF= " << fitfunc1->GetChisquare()/fitfunc1->GetNDF() << endl;
+
+    cout << "\nQ2 = " << fitfunc1->GetParameter(2) <<" +/- "<< fitfunc1->GetParError(2) << endl;
+    cout << "Q4 = " << fitfunc1->GetParameter(3) <<" +/- "<< fitfunc1->GetParError(3) << endl;
+
+    cout << "\nNORM C = " << fitfunc1->GetParameter(4) <<" +/- "<< fitfunc1->GetParError(4) << endl;
+    fhist1->SetTitle("Angular Distribution of NORM C");
+    fhist1->Draw("AP");
     
    
  
     
 
 }
+
