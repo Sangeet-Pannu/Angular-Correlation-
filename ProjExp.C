@@ -42,16 +42,19 @@ void ProjExp(std::string name, float lowProj, float highProj, float lowBGProj = 
    std::string name_tmp, filename;
   
    TH2F *matrix = (TH2F*)finput->Get(name.c_str());
-  
+   //std::string name_tmpBG = name+"BG";
+   //TH2F *matrix2 = (TH2F*)finput->Get(name_tmpBG.c_str());
+   
+   //TH1D *proj_F =new TH1D("proj_F","proj_F",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
+   //TH1D *proj_FBG =new TH1D("proj_FBG","proj_FBG",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
+   
    TH1D *proj =new TH1D("proj","proj",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax()); // defines the histogram: name, name, Number of total bins, min bin value, max bin value.
-  
    TH1D *projBG =new TH1D("projBG","projBG",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
-
    TH1D *projBG2 =new TH1D("projBG2","projBG2",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
-
    TH1D *projMixed =new TH1D("projMixed","projMixed",matrix->GetXaxis()->GetNbins(),matrix->GetXaxis()->GetXmin(),matrix->GetXaxis()->GetXmax());
    projBG->Sumw2();
    projMixed->Sumw2();
+   matrix->Sumw2();
    std::cout << std::endl << "Start to project and export " << nang << " " << name <<"-like matrixes:" << std::endl << std::endl;
    std::cout << "   Low projection limit = " << lowProj << std::endl;
    std::cout << "   High projection limit = " << highProj << std::endl;
@@ -74,7 +77,13 @@ void ProjExp(std::string name, float lowProj, float highProj, float lowBGProj = 
    //----------------------------------------------------------------------------------
    std::cout << "   Time coincidence normalization = " << background_normalization << std::endl << std::endl;
    //----------------------------------------------------------------------------------
-   
+    //matrix->Add(matrix2,-1*background_normalization);
+    //matrix->ProjectionX("proj_F",matrix->GetXaxis()->FindBin(lowProj),matrix->GetXaxis()->FindBin(highProj));
+    //matrix->ProjectionX("proj_FBG",matrix->GetXaxis()->FindBin(lowProj),matrix->GetXaxis()->FindBin(highProj));
+    //proj_F->Sumw2();
+    //proj_F->Add(proj_FBG,-1*((highProj-lowProj)/(highBG2Proj-lowBG2Proj)));
+   // proj_F->Write(Form("%s",name.c_str()));
+    
    //----------------------------------------------------------------------------------
    for(int i=0;i<nang;i++){ // nang are the total number of angles in experiment.
       std::cout << "   Doing matrix " << name <<  i << std::endl;
@@ -84,7 +93,7 @@ void ProjExp(std::string name, float lowProj, float highProj, float lowBGProj = 
       //----------------------------------------------------------------------------------
       name_tmp=name+"BG"+std::to_string(i); 
       TH2F *matrixBG = (TH2F*)finput->Get(name_tmp.c_str());// Gets the name+i background histogram.
-      matrix->Sumw2();
+      
       matrix->Add(matrixBG,-1*background_normalization); // Some form of background normalization.
       //----------------------------------------------------------------------------------
       
@@ -233,9 +242,9 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
    //---------------------------------------------------------------------|[Normal AC Histograms]
       //Fit function definitions of the Normal (Non-eventmixed histograms)
       TRWPeak *p1 = new TRWPeak(cent); //Centroidal value defined by user.
-      TRWPeak *pM1 = new TRWPeak(1326.27);
-      TRWPeak *pL1 = new TRWPeak(1331.20);
-     // TRWPeak *pK1 = new TRWPeak(702);
+      TRWPeak *pM1 = new TRWPeak(1343);
+      TRWPeak *pL1 = new TRWPeak(1322.61 );
+      TRWPeak *pK1 = new TRWPeak(598.19 );
       
       //TGauss *p1 = new TGauss(cent,-1);
       //TGauss *pM1 = new TGauss(688.89,-1);
@@ -245,42 +254,56 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
       // Adding peaks
       pf->AddPeak(p1);
       pf->AddPeak(pM1);
-      pf->AddPeak(pL1);
-      //pf->AddPeak(pK1);
+     // pf->AddPeak(pL1);
+     // pf->AddPeak(pK1);
        
-           // p1->GetFitFunction()->FixParameter(6,5);
-           // p1->GetFitFunction()->SetParameter(1,cent);
-           // p1->GetFitFunction()->SetParameter(0,200);
-           // pM1->GetFitFunction()->FixParameter(5,0);
-           // pM1->GetFitFunction()->FixParameter(1,688.89);
-            //pM1->GetFitFunction()->FixParameter(5,0);
-            //p1->GetFitFunction()->SetParameter(0,500);
-            //p1->GetFitFunction()->SetParLimits(5,538.5,540);
+      // p1->GetFitFunction()->FixParameter(6,5);
+     // p1->GetFitFunction()->SetParLimits(1,1341.2,1341.6);
+      // p1->GetFitFunction()->SetParameter(0,200);
+      // pM1->GetFitFunction()->FixParameter(5,0);
+      p1->GetFitFunction()->FixParameter(5,0);    
+      pM1->GetFitFunction()->SetParLimits(1,1343.3,1343.6);
+      
+      pM1->GetFitFunction()->FixParameter(5,0);
+      pL1->GetFitFunction()->SetParLimits(1,1322.1,1322.9);
+      pL1->GetFitFunction()->FixParameter(5,0);
+      pK1->GetFitFunction()->FixParameter(1,598.19);
+      pK1->GetFitFunction()->FixParameter(5,0);
+      
+      // pM1->GetFitFunction()->FixParameter(1,688.89);
+      //pM1->GetFitFunction()->FixParameter(5,0);
+      //p1->GetFitFunction()->SetParameter(0,500);
+      //p1->GetFitFunction()->SetParLimits(5,538.5,540);
       //---------------------------------------------------------------------|[Normal AC Histograms]
    
       //---------------------------------------------------------------------|[Event Mixed AC Histograms]
       //Fit function definitions of the Normal (Event-Mixed histograms)
-      //TRWPeak *p2 = new TRWPeak(cent); //Centroidal value defined by user.
-      //TRWPeak *pM2 = new TRWPeak(688.89); //Centroidal value defined by user.
-      TGauss *p2 = new TGauss(cent,-1);
+      TRWPeak *p2 = new TRWPeak(cent); //Centroidal value defined by user.    
+      TRWPeak *pM2 = new TRWPeak(1343.49);
+      TRWPeak *pM3 = new TRWPeak(1322.61 );
+      TRWPeak *pM4 = new TRWPeak(598.19 );
+     // TGauss *p2 = new TGauss(cent,-1);
     //  TGauss *pM2 = new TGauss(688.89,-1);
-      //TRWPeak *pM3 = new TRWPeak(408); //Centroidal value defined by user.
-      //TRWPeak *pM4 = new TRWPeak(702); //Centroidal value defined by user.
-      //TRWPeak *pM5 = new TRWPeak(835.904); //Centroidal value defined by user.
-      //TRWPeak *pM6 = new TRWPeak(711.356); //Centroidal value defined by user.
-      
+    
       // Define fitter
       TPeakFitter *pf2 = new TPeakFitter(lowProj,highProj);
 
       // Adding peaks
       pf2->AddPeak(p2);
-    //  pf2->AddPeak(pM2);
-      //pf2->AddPeak(pM3);
-      //pf2->AddPeak(pM4);
+      pf2->AddPeak(pM2);
+     // pf2->AddPeak(pM3);
+     // pf2->AddPeak(pM4);
       //pf2->AddPeak(pM5);
       //pf2->AddPeak(pM6);
       
-       p2->GetFitFunction()->SetParameter(1,cent);
+      p2->GetFitFunction()->SetParLimits(1,1341.2,1341.6);
+      p2->GetFitFunction()->FixParameter(5,0);    
+      pM2->GetFitFunction()->SetParLimits(1,1343.3,1343.6);
+      pM2->GetFitFunction()->FixParameter(5,0);
+      pM3->GetFitFunction()->SetParLimits(1,1322.1,1322.9);
+      pM3->GetFitFunction()->FixParameter(5,0);
+      pM4->GetFitFunction()->FixParameter(1,598.19);
+      pM4->GetFitFunction()->FixParameter(5,0);
        //p2->GetFitFunction()->FixParameter(5,0);
        //p2->GetFitFunction()->SetParameter(2,7519366.042613);
       // pM2->GetFitFunction()->FixParameter(5,0);
@@ -356,18 +379,24 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
           
             name_tmp1 = name_tmp1 + ".root";
             auto h = CreateSliceHist(Histo,lowProj-10,highProj+10);
+            //pf->GetBackground()->FixParameter(0,0);
+            pf->GetBackground()->FixParameter(1,0);
+            Histo->SetTitle(Form("Angle #:%d",i));
+            Histo->SetAxisRange(lowProj-1,highProj+1);
             
-            h->SetTitle(Form("Angle #:%d",i));
-            
-            if(false){ //to algin the sigma values of all peaks.
-               pf->Fit(h,"NEQM");
+            if(true){ //to algin the sigma values of all peaks.
+               p1->GetFitFunction()->SetParLimits(2,0.5,3);
+               pf->Fit(Histo,"NEQM");
+               p1->GetFitFunction()->FixParameter(2,p1->GetFitFunction()->GetParameter(2));
                pM1->GetFitFunction()->FixParameter(2,p1->GetFitFunction()->GetParameter(2));
-               pL1->GetFitFunction()->FixParameter(2,p1->GetFitFunction()->GetParameter(2));
+               pL1->GetFitFunction()->FixParameter(2,p1->GetFitFunction()->GetParameter(2)); //p1->GetFitFunction()->GetParameter(2)
+               pK1->GetFitFunction()->FixParameter(2,p1->GetFitFunction()->GetParameter(2));
+               
             }
-
-            TFitResultPtr Normal1 = pf->Fit(h,"SEM");//fits the addbackAddback projected histogram
+            //
+            TFitResultPtr Normal1= pf->Fit(Histo,"SEM");//fits the addbackAddback projected histogram
             c1->Update();
-            if(!fitplots && !viewratio) c1->WaitPrimitive(); 
+          if(!fitplots && !viewratio) c1->WaitPrimitive(); 
              
           if(viewratio)
           {
@@ -391,33 +420,45 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
           auto c2 = new TCanvas("c2", "Fitted Histograms",1000, 600); 
           //h->Draw();
           
-          DrawFits(Normal1.Get(),lowProj,highProj,h);
+          DrawFits(Normal1.Get(),lowProj,highProj,Histo);
           
           c2->Update();
           c2->WaitPrimitive(); 
              c2->Close();
        }        
           //=================Drawing out the Fits=================|
-          /*  
-            if(p1->GetChi2()/p1->GetNDF()>30)
-            {
-               c1->WaitPrimitive(); 
-               Badfit = true;
+           
+           // if(p1->GetChi2()/p1->GetNDF()>30)
+            //{
+               //c1->WaitPrimitive(); 
+              // Badfit = true;
                c1->SaveAs(name_tmp1.c_str());
-            }
-   */
+            //}
+   
    //  |======================================================================================|[3] [Fitting of the NORMAL AC]
-        continue;
+       
    //  |======================================================================================|[3][Fitting of the EVENT MIXED AC]
        name_tmp2 = name+"Mixed"+std::to_string(i);
             TH1D *Histomixed = (TH1D*)finput->Get(name_tmp2.c_str());
             
             name_tmp2 = name_tmp2 + ".root";
 
-       auto h1_mixed = CreateSliceHist(Histomixed,lowProj-10,highProj+10);           
-       h1_mixed->SetTitle(Form("Mixed Angle #:%d",i));
-       
-            TFitResultPtr Normal2 = pf2->Fit(h1_mixed,"SEM"); //fits the addbackAddbackMIXED projected histograms
+       auto h1_mixed = CreateSliceHist(Histomixed,lowProj-1,highProj+1);           
+       Histomixed->SetTitle(Form("Mixed Angle #:%d",i));
+       Histomixed->SetAxisRange(lowProj-5,highProj+5);
+       pf2->GetBackground()->FixParameter(1,0);
+       if(true){ //to algin the sigma values of all peaks.
+       	       p2->GetFitFunction()->SetParLimits(2,0.5,3);
+               pf2->Fit(Histomixed,"NEQM");
+               p2->GetFitFunction()->FixParameter(2,p2->GetFitFunction()->GetParameter(2));
+               pM2->GetFitFunction()->FixParameter(2,p2->GetFitFunction()->GetParameter(2));
+              pM3->GetFitFunction()->FixParameter(2,p2->GetFitFunction()->GetParameter(2));
+               pM4->GetFitFunction()->FixParameter(2,p2->GetFitFunction()->GetParameter(2));
+               
+            }
+            //p2->GetBackgroundFunction()->FixParameter(1,0);
+           
+            TFitResultPtr Normal2 = pf2->Fit(Histomixed,"SEM"); //fits the addbackAddbackMIXED projected histograms
             c1->Update();
             if(!fitplots && !viewratio) c1->WaitPrimitive(); 
             
@@ -451,12 +492,12 @@ void ProjFit(std::string name, float cent = 1., float lowProj=1., float highProj
             
             if(filecreated)  c1->WaitPrimitive();
       
-            if(p2->GetChi2()/p2->GetNDF()>30)
-            {
+           // if(p2->GetChi2()/p2->GetNDF()>30)
+           // {
       
-               BadfitMixed = true;
+               //BadfitMixed = true;
                c1->SaveAs(name_tmp2.c_str());
-            }
+           // }
          //  |======================================================================================|[3][Fitting of the EVENT MIXED AC]   
 
          
