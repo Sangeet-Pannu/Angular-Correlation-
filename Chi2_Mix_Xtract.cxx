@@ -39,8 +39,19 @@ int main(){
         1.20067,1.29824,1.38323,1.39967,1.56271,1.57888,1.7419,1.75836,1.8433,1.94093,1.98971,
         2.06059,2.06739,2.09359,2.1463,2.19586,2.23192,2.34598,2.8865,2.96151,3.14159};
 
-    float Wtheo[29];
-    float Wtheo_0[29];
+    //Ifin: All the possible angles.
+    float M_angs[56] = {0.5910522605,0.6227631477,0.7709206573,0.7806159612,0.7924842002,
+        0.7965403453,0.8175750535,0.8953835769,0.9090739395,0.9305484706,0.9493613746,0.9722827837,
+        0.9916594291,0.9940138782,1.033130197,1.063060849,1.074906398,1.079959127,1.082505562,1.149833383,
+        1.166417502,1.204371432,1.215853953,1.313170021,1.338644847,1.468825465,1.494504495,1.518713957,
+        1.622878697,1.647088159,1.672767188,1.802942571,1.828424378,1.925743937,1.937228203,1.975171661,
+        1.991752289,2.059087092,2.061635272,2.066679274,2.078530059,2.108462456,2.147575285,2.149931479,
+        2.169304634,2.19223826,2.211035456,2.232520459,2.246203841,2.324010619,2.34505929,2.349108453,2.360976692,
+        2.370680723,2.51882427,2.550536902};
+
+
+    float Wtheo[106];
+    float Wtheo_0[106];
 
     int J2 = 2, J3 = 0;
     float ac_min = 0;
@@ -79,8 +90,15 @@ int main(){
     float exp_min = 0;
     float exp_max = 0;
 
-    float Q2 = 5.07535e-01;//quenching factors
-    float Q4 = 4.80309e-01;
+    //Fipps-Fipps
+    float Q2F = 0.8833;// Has a 1.03% error
+    float Q4F = 0.6834;// Has a 0.6% Error
+    //Ifin-Ifin
+    float Q2I = 0.9390;// Has a 3.91% Error
+    float Q4I = 0.7359;//Has a 0.85% Error
+    //Mixing
+    float Q2M = 0.9006;//Has a 1.65% Error
+    float Q4M = 0.7109;//Has a 0.72% Error
 
     float chi_rp120 = 0; //chi^2+1
     float chi_rp220 = 0;
@@ -96,14 +114,17 @@ int main(){
     float drm220 = 0;
     float drm320 = 0;
 
-    float CV95 =2.37;
+    //Calculated Confidence value (99%)
+    float CV95 =1.34; 
+    
     int loopc;
 
     std::ifstream infile("exp.txt");
     std::string lline;
-    float y[29];
-    float yr[29];
+    float y[106];
+    float yr[106];
     int count1 = 0;
+
     if (infile.is_open())
         {
      
@@ -126,10 +147,70 @@ int main(){
         infile.close();
         
         }
-        else
-        {
+    else
+    {
         std::cout << "error: infile is not open" << std::endl;
-        }   
+    }
+
+    std::ifstream infileI("exp.txt");
+    std::string llineI;
+  
+    if (infileI.is_open())
+        {
+     
+        while (std::getline(infileI, llineI))
+        {
+
+            std::stringstream ss(llineI);
+            float b, c;
+            int a;
+            
+                    
+            if (ss >> a >> b >> c)
+            {
+                y[count1] = b;
+                yr[count1] = c;
+            }
+            count1++;
+        }
+        
+        infileI.close();
+        
+        }
+    else
+    {
+        std::cout << "error: infile IFIN is not open" << std::endl;
+    } 
+
+    std::ifstream infileM("exp.txt");
+    std::string llineM;
+    if (infileM.is_open())
+        {
+     
+        while (std::getline(infileM, llineM))
+        {
+
+            std::stringstream ss(llineM);
+            float b, c;
+            int a;
+            
+                    
+            if (ss >> a >> b >> c)
+            {
+                y[count1] = b;
+                yr[count1] = c;
+            }
+            count1++;
+        }
+        
+        infileM.close();
+        
+        }
+    else
+    {
+        std::cout << "error: infile Mixing is not open" << std::endl;
+    } 
+
     //---------------------
 
     for(int k=2;k<(count1-1);k++) std::cout << "Normalized Peak areas: " << y[k] << "\tCorresponding errors: " << yr[k] << std::endl;
@@ -159,6 +240,8 @@ int main(){
     std::cout << exp_max << " " << exp_min << std::endl;
 
     std::stringstream cfilename;
+    std::stringstream cfilename2;
+    std::stringstream cfilename3;
         
         cfilename << "exp.dat";
         std::string cname = cfilename.str();
@@ -166,23 +249,67 @@ int main(){
         std::ofstream cfile (cname);
         if (cfile.is_open())
         {
-                
-            if(isFipps){
-                for(int i = 0; i<21; i++){
-                    cfile << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+    
+                for(int i = 0; i<106; i++){
+                    if(i<21)cfile << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=21 && i<50 )cfile << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=50)cfile << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
                 }
-            }
-            if(isIfin){
-                for (int i = 0; i < 29; ++i)
-                {
-                    cfile << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                }
-                    
-            }
+     
  
         }
         cfile.close();
 
+        cfilename1 << "exp_Fipps.dat";
+        std::string cname1 = cfilename1.str();
+        
+        std::ofstream cfile1 (cname1);
+        if (cfile1.is_open())
+        {
+    
+                for(int i = 0; i<21; i++){
+                    if(i<21)cfile1 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=21 && i<50 )cfile << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=50)cfile1 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                }
+     
+ 
+        }
+        cfile1.close();
+
+        cfilename2 << "exp_Ifin.dat";
+        std::string cname2 = cfilename2.str();
+        
+        std::ofstream cfile2 (cname2);
+        if (cfile2.is_open())
+        {
+    
+                for(int i = 21; i<50; i++){
+                    if(i<21)cfile2 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=21 && i<50 )cfile2 << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=50)cfile2 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                }
+     
+ 
+        }
+        cfile2.close();
+
+        cfilename3 << "exp_Mix.dat";
+        std::string cname3 = cfilename3.str();
+        
+        std::ofstream cfile3 (cname3);
+        if (cfile3.is_open())
+        {
+    
+                for(int i = 50; i<106; i++){
+                    if(i<21)cfile3 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=21 && i<50 )cfile3 << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    if(i>=50)cfile3 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                }
+     
+ 
+        }
+        cfile3.close();
     
     //==========================================================================================================|J|
     for (int J1 = 0; J1 < 5; J1++)
@@ -295,8 +422,7 @@ int main(){
                         return 0;
                     }
         
-        float a22 = Q2 * R2LLJ2J1 * R2LLJ2J3;
-        float a44 = Q4 * R4LLJ2J1 * R4LLJ2J3;
+        
         
        
         std::ofstream chifile (chiname);
@@ -309,29 +435,38 @@ int main(){
                 //Set to zero as the second gamma goes from 2_1+ to 0_1+ which is a pure E2 transition.
                 int delta2 = 0;
                 
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                float a2=0;
+                float a4=0;
+                loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
                 //---------------------------------------------------------**
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
-
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2= Q2F * ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                        a4= Q4F * ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2= Q2I * ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                        a4= Q4I * ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                         a2= Q2M * ((R2LLJ2J1 + 2 * delta1 * R2LMJ2J1 + pow(delta1, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                        a4= Q4M * ((R4LLJ2J1 + 2 * delta1 * R4LMJ2J1 + pow(delta1, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) / (1 + pow(delta1, 2)) / (1 + pow(delta2, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
+                
                 //========================================================**
             
         
@@ -339,11 +474,7 @@ int main(){
 
              
                 //=============================================================================***
-                // "Normalization Coefficent"
-                //wcoeff1 = SUM_{Y*W_theo/Yr^2}
-                //wcoeff2 = SUM_{W_theo^2/Yr^2}
-                //woceff = wcoeff1/wcoeff2 = UM_{Y*W_theo/Yr^2}/SUM_{W_theo^2/Yr^2}
-
+            
                 for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
                 for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
 
@@ -353,6 +484,7 @@ int main(){
                 for(int j = 0; j<loopc; j++) ChiSquare += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
 
                 ChiSquare = ChiSquare/(loopc-1); //chi2/NDF, where NDF = DOF - 1; 
+
                 //=============================================================================***     
                 
                 //=============================================================================****              
@@ -485,26 +617,37 @@ int main(){
         if (J1 == 1 && J2 == 2 && J3 == 0) {
             for (d1 = delmin120; d1 <= 51.000; d1 += 0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                 
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
+                a2=0;
+                a4=0;
+                loopc = 0;
 
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 
                // "Normalization Coefficent"
@@ -538,26 +681,36 @@ int main(){
             }
             for (d1 = delmin120; d1 >= -51.000; d1 += -0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
-    
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
+                a2=0;
+                a4=0;
+                loopc = 0;
 
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 
                // "Normalization Coefficent"
@@ -591,26 +744,36 @@ int main(){
         }else if (J1 == 2 && J2 == 2 && J3 == 0) {
             for (d1 = delmin220; d1 <= 52.000; d1 += 0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
-            
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
+                a2=0;
+                a4=0;
+                loopc = 0;
 
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 
                // "Normalization Coefficent"
@@ -642,27 +805,36 @@ int main(){
             }
             for (d1 = delmin220; d1 >= -52.00; d1 += -0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                a2=0;
+                a4=0;
+                loopc = 0;
 
-
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
-
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 
                // "Normalization Coefficent"
@@ -696,22 +868,33 @@ int main(){
         }else if (J1 == 3 && J2 == 2 && J3 == 0) {
             for (d1 = delmin320; d1 <= 51.000; d1 += 0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
-                
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
+                a2=0;
+                a4=0;
+                loopc = 0;
+
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
+                    for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
-                }
-
-                if(isFipps)
+                }else if(loopc>=21 && loopc<50)
                 {
-                    loopc = 0;
-                    for(const auto& ang : F_angs){
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
@@ -748,28 +931,36 @@ int main(){
             }
             for (d1 = delmin320; d1 >= -51.000; d1 += -0.010){
                 ChiSquare2 = 0;
-                float a2 = Q2 * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
-                float a4 = Q4 * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
-                
-               
+                a2=0;
+                a4=0;
+                loopc = 0;
 
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
-
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * d1 * R2LMJ2J1 + pow(d1, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(d1, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * d1 * R4LMJ2J1 + pow(d1, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(d1, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 
                // "Normalization Coefficent"
@@ -809,36 +1000,48 @@ int main(){
         std::ofstream chi0file (chi0name);
         if (chi0file.is_open())
         {
+                float a22 = 0;
+                float a44 = 0;
+                loopc = 0;
 
-            if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
-
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
                     for(const auto& ang : F_angs){
-                        Wtheo[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        a22=Q2F * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4F * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
+                }else if(loopc>=21 && loopc<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a22=Q2I * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4I * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a22=Q2M * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4M * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
                 }
                 wcoeff1 = 0; 
                 wcoeff2 = 0;
 
-                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
-                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
+                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo_0[i]/yr[i+2],2);
 
                 wcoeff = wcoeff1/wcoeff2;
 
                 // "Calculation of Chi2/NDF value"
    
-                for(int j = 0; j<loopc; j++) ChiSquare_0 += pow((y[j+2]-wcoeff*Wtheo[j])/yr[j+2],2);
+                for(int j = 0; j<loopc; j++) ChiSquare_0 += pow((y[j+2]-wcoeff*Wtheo_0[j])/yr[j+2],2);
 
                 ChiSquare_0 = ChiSquare_0/(loopc-1); //chi2/NDF, where NDF = DOF - 1;
                 
@@ -948,79 +1151,180 @@ int main(){
          */
         
         int delta2 = 0;
+        float a22 = 0;
+        float a44 = 0;
+        float a2 = 0;
+        float a4 =0;
         
-        float a2 = Q2 * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3 + 2 * delta2 * R2LMJ2J3 + pow(delta2, 2) * R2MMJ2J3) * 1 / (1 + pow(del_min, 2)) * 1 / (1 + pow(delta2, 2)));
-        float a4 = Q4 * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3 + 2 * delta2 * R4LMJ2J3 + pow(delta2, 2) * R4MMJ2J3) * 1 / (1 + pow(del_min, 2)) * 1 / (1 + pow(delta2, 2)));
-        
-        
-      
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
+        loopc = 0;
+
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc<21)
+                {  
+                    for(const auto& ang : F_angs){
+                        a2 = Q2F * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+                        a4 = Q4F * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
-
-                }
-
-                if(isFipps)
+                }else if(loopc>=21 && loopc<50)
                 {
-                    loopc = 0;
-                    for(const auto& ang : F_angs){
+                    for(const auto& ang : I_angs){
+                        a2 = Q2I * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+                        a4 = Q4I * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
+                        Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a2 = Q2M * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+                        a4 = Q4M * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
                         Wtheo[loopc] =  1 + a2 * (3 * pow(cos (ang), 2) - 1) / 2 + a4 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
                         loopc++;
                     }
                 }
 
-                if(isIfin){
-                    loopc = 0;
-                    for(const auto& ang : I_angs){
-                        Wtheo_0[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
-                    }
+                int loopc1 = 0;
 
-                }
-
-                if(isFipps)
-                {
-                    loopc = 0;
+                //Definition of the theoritcal angular correlation results.
+                //---------------------------------------------------------**
+                if(loopc1<21)
+                {  
                     for(const auto& ang : F_angs){
-                        Wtheo_0[loopc] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
-                        loopc++;
+                        a22=Q2F * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4F * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc1] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc1++;
+                    }
+                }else if(loopc1>=21 && loopc1<50)
+                {
+                    for(const auto& ang : I_angs){
+                        a22=Q2I * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4I * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc1] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc1++;
+                    }
+                }else
+                {
+                    for(const auto& ang : M_angs){
+                        a22=Q2M * R2LLJ2J1 * R2LLJ2J3;
+                        a44=Q4M * R4LLJ2J1 * R4LLJ2J3;
+                        Wtheo_0[loopc1] =  1 + a22 * (3 * pow(cos (ang), 2) - 1) / 2 + a44 * (35 * pow(cos (ang), 4) - 30 * pow(cos (ang), 2) + 3) / 8;
+                        loopc1++;
                     }
                 }
                   
         
-                wcoeff1 = 0; 
-                wcoeff2 = 0;
+                double wcoeff1F = 0; 
+                double wcoeff2F = 0;
 
-                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
-                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo[i]/yr[i+2],2);
+                double wcoeff1I = 0; 
+                double wcoeff2I = 0;
 
-                wcoeff = wcoeff1/wcoeff2;
+                double wcoeff1M = 0; 
+                double wcoeff2M = 0;
 
-                wcoeff1 = 0; 
-                wcoeff2 = 0;
+                double wcoeffF = 0;
+                double wcoeffI = 0
+                double wcoeffM = 0
 
-                for(int i = 0; i<loopc; i++) wcoeff1 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
-                for(int i = 0; i<loopc; i++) wcoeff2 +=  pow(Wtheo_0[i]/yr[i+2],2);
+                for(int i = 0; i<21; i++) wcoeff1F +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 0; i<21; i++) wcoeff2F +=  pow(Wtheo[i]/yr[i+2],2);
 
-                float wcoeff_0 = wcoeff1/wcoeff2;
+                for(int i = 21; i<50; i++) wcoeff1I +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 21; i<50; i++) wcoeff2I +=  pow(Wtheo[i]/yr[i+2],2);
+
+                for(int i = 50; i<loopc; i++) wcoeff1M +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
+                for(int i = 50; i<loopc; i++) wcoeff2M +=  pow(Wtheo[i]/yr[i+2],2);
+
+                wcoeffF = wcoeff1F/wcoeff2F;
+                wcoeffI = wcoeff1I/wcoeff2I;
+                wcoeffM = wcoeff1M/wcoeff2M;
+
+                double wcoeff1F_0 = 0; 
+                double wcoeff2F_0 = 0;
+
+                double wcoeff1I_0 = 0; 
+                double wcoeff2I_0 = 0;
+
+                double wcoeff1M_0 = 0; 
+                double wcoeff2M_0 = 0;
+
+                double wcoeffF_0 = 0;
+                double wcoeffI_0 = 0
+                double wcoeffM_0 = 0
+
+                for(int i = 0; i<21; i++) wcoeff1F_0 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
+                for(int i = 0; i<21; i++) wcoeff2F_0 +=  pow(Wtheo_0[i]/yr[i+2],2);
+
+                for(int i = 21; i<50; i++) wcoeff1I_0 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
+                for(int i = 21; i<50; i++) wcoeff2I_0 +=  pow(Wtheo_0[i]/yr[i+2],2);
+
+                for(int i = 50; i<loopc; i++) wcoeff1M_0 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
+                for(int i = 50; i<loopc; i++) wcoeff2M_0 +=  pow(Wtheo_0[i]/yr[i+2],2);
+                
+
+                wcoeffF_0 = wcoeff1F_0/wcoeff2F_0;
+                wcoeffI_0 = wcoeff1I_0/wcoeff2I_0;
+                wcoeffM_0 = wcoeff1M_0/wcoeff2M_0;
         
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+        
+        //Fipps Distribution
         std::stringstream mixedfilename;
         //mixedfilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
-        mixedfilename << "AC" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
+        mixedfilename << "AC_Fipps" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
         std::string mixedname = mixedfilename.str();
         std::ofstream mixedfile (mixedname);
         
         std::stringstream zerofilename;
         //zerofilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
-        zerofilename << "AC" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
+        zerofilename << "AC_Fipps" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
         std::string zeroname = zerofilename.str();
         std::ofstream zerofile (zeroname);
+        //-------------------------------|
+
+        //Ifin Distribution
+        std::stringstream mixedfilenameI;
+        //mixedfilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
+        mixedfilenameI << "AC_Ifin" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
+        std::string mixednameI = mixedfilenameI.str();
+        std::ofstream mixedfileI (mixednameI);
+        
+        std::stringstream zerofilenameI;
+        //zerofilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
+        zerofilenameI << "AC_Ifin" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
+        std::string zeronameI = zerofilenameI.str();
+        std::ofstream zerofileI (zeronameI);
+        //-------------------------------|
+
+
+        //Mixing Distribution
+        std::stringstream mixedfilenameM;
+        //mixedfilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
+        mixedfilenameM << "AC_Mix" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_min_Ru100.dat";
+        std::string mixednameM = mixedfilenameM.str();
+        std::ofstream mixedfileM (mixednameM);
+        
+        std::stringstream zerofilenameM;
+        //zerofilename << Output2 << "AC" << peak << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
+        zerofilenameM << "AC_Mix" << "_"<< J1 << "-" << J2 << "-" << J3 << "_delta_0_Ru100.dat";
+        std::string zeronameM = zerofilenameM.str();
+        std::ofstream zerofileM (zeronameM);
+
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
         float Wtheomixed;
         float Wtheomixed_0;
+
+        //===========================================================================|FIPPS AC SAVING|
+
+        a2 = Q2F * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+        a4 = Q4F * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
+        a22=Q2F * R2LLJ2J1 * R2LLJ2J3;
+        a44=Q4F * R4LLJ2J1 * R4LLJ2J3;
 
         if (zerofile.is_open())
         {
@@ -1028,8 +1332,8 @@ int main(){
             {
                 for (int tt = 0; tt < 181; tt++)
                 {
-                    Wtheomixed = (1 + a2 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a4 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeff;
-                    Wtheomixed_0 = (1 + a22 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a44 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeff_0;
+                    Wtheomixed = (1 + a2 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a4 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffF;
+                    Wtheomixed_0 = (1 + a22 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a44 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffF_0;
                     
                     if (count==0) {
                         if (Wtheomixed > Wtheomixed_0){
@@ -1059,9 +1363,99 @@ int main(){
             zerofile.close();
         }
         mixedfile.close();
+        //===========================================================================|FIPPS AC SAVING|
         
-    
+        
+        //===========================================================================|IFIN AC SAVING|
 
+        a2 = Q2I * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+        a4 = Q4I * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
+        a22=Q2I * R2LLJ2J1 * R2LLJ2J3;
+        a44=Q4I * R4LLJ2J1 * R4LLJ2J3;
+
+        if (zerofileI.is_open())
+        {
+            if (mixedfileI.is_open())
+            {
+                for (int tt = 0; tt < 181; tt++)
+                {
+                    Wtheomixed = (1 + a2 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a4 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffI;
+                    Wtheomixed_0 = (1 + a22 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a44 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffI_0;
+                    
+                    if (count==0) {
+                        if (Wtheomixed > Wtheomixed_0){
+                            ac_min = Wtheomixed_0;
+                            ac_max = Wtheomixed;
+                        }else{
+                            ac_min = Wtheomixed;
+                            ac_max = Wtheomixed_0;
+                        }
+                    }else if (ac_min > Wtheomixed_0){
+                        ac_min = Wtheomixed_0;
+                    }else if(ac_min > Wtheomixed){
+                        ac_min = Wtheomixed;
+                        
+                    }else if(ac_max < Wtheomixed_0){
+                        ac_max = Wtheomixed_0;
+                    }else if(ac_max < Wtheomixed){
+                        ac_max = Wtheomixed;
+                        
+                    }
+                    count++;
+                    
+                    zerofileI << cos(tt*PI/180) << " " << Wtheomixed_0 << std::endl;
+                    mixedfileI << cos(tt*PI/180) << " " << Wtheomixed << std::endl;
+                }
+            }
+            zerofileI.close();
+        }
+        mixedfileI.close();
+        //===========================================================================|IFIN AC SAVING|
+       
+        //===========================================================================|Mixed AC SAVING|
+        a2 = Q2M * ((R2LLJ2J1 + 2 * del_min * R2LMJ2J1 + pow(del_min, 2) * R2MMJ2J1) * (R2LLJ2J3) / (1 + pow(del_min, 2)));
+        a4 = Q4M * ((R4LLJ2J1 + 2 * del_min * R4LMJ2J1 + pow(del_min, 2) * R4MMJ2J1) * (R4LLJ2J3) / (1 + pow(del_min, 2)));
+        a22=Q2M * R2LLJ2J1 * R2LLJ2J3;
+        a44=Q4M * R4LLJ2J1 * R4LLJ2J3;
+
+        if (zerofileM.is_open())
+        {
+            if (mixedfileM.is_open())
+            {
+                for (int tt = 0; tt < 181; tt++)
+                {
+                    Wtheomixed = (1 + a2 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a4 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffM;
+                    Wtheomixed_0 = (1 + a22 * (3 * pow(cos (tt*PI/180), 2) - 1) / 2 + a44 * (35 * pow(cos (tt*PI/180), 4) - 30 * pow(cos (tt*PI/180), 2) + 3) / 8) * wcoeffM_0;
+                    
+                    if (count==0) {
+                        if (Wtheomixed > Wtheomixed_0){
+                            ac_min = Wtheomixed_0;
+                            ac_max = Wtheomixed;
+                        }else{
+                            ac_min = Wtheomixed;
+                            ac_max = Wtheomixed_0;
+                        }
+                    }else if (ac_min > Wtheomixed_0){
+                        ac_min = Wtheomixed_0;
+                    }else if(ac_min > Wtheomixed){
+                        ac_min = Wtheomixed;
+                        
+                    }else if(ac_max < Wtheomixed_0){
+                        ac_max = Wtheomixed_0;
+                    }else if(ac_max < Wtheomixed){
+                        ac_max = Wtheomixed;
+                        
+                    }
+                    count++;
+                    
+                    zerofileM << cos(tt*PI/180) << " " << Wtheomixed_0 << std::endl;
+                    mixedfileM << cos(tt*PI/180) << " " << Wtheomixed << std::endl;
+                }
+            }
+            zerofileM.close();
+        }
+        mixedfileM.close();
+        //===========================================================================|Mixed AC SAVING|
     }//=========================================================================================================|J|
 
     float ACmax = 0, ACmin =0;
@@ -1082,100 +1476,28 @@ int main(){
     if (peak == 1073){
         ymin= 0.75 * ACmin;
         ymax= 1.12 * ACmax;
-    }else if (peak == 884){
-        ymin= 1.95 * ACmin;
-        ymax= 0.8 * ACmax;
-    }else if (peak == 1126){
-        ymin= 1.8 * ACmin;
-        ymax= 0.65 * ACmax;
-    }else if (peak == 1421){
-        ymin= 0.97 * exp_min;
-        ymax= 1.2 * exp_max;
-    }else if (peak == 1505){
-        ymin= 0.65 * exp_min;
-        ymax= 2.2 * exp_max;
-    }else if (peak == 1630){
-        ymin= 0.8 * exp_min;
-        ymax= 1.5 * exp_max;
-    }else if (peak == 1698){
-        ymin= 0.9 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 1822){
-        ymin= 0.9 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 1904){
-        ymin= 0.92 * exp_min;
-        ymax= 1.3 * exp_max;
-    }else if (peak == 2004){
-        ymin= 0.84 * exp_min;
-        ymax= 1.5 * exp_max;
-    }else if (peak == 2130){
-        ymin= 0.95 * exp_min;
-        ymax= 1.2 * exp_max;
-    }else if (peak == 2212){
-        ymin= 0.9 * exp_min;
-        ymax= 1.3 * exp_max;
-    }else if (peak == 2318){
-        ymin= 0.9 * exp_min;
-        ymax= 1.3 * exp_max;
-    }else if (peak == 2421){
-        ymin= 0.75 * exp_min;
-        ymax= 2.1 * exp_max;
-    }else if (peak == 2445){
-        ymin= 0.85 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 2537){
-        ymin= 0.85 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 2658){
-        ymin= 0.85 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 2747){
-        ymin= 0.78 * exp_min;
-        ymax= 1.7 * exp_max;
-    }else if (peak == 2809){
-        ymin= 0.92 * exp_min;
-        ymax= 1.38 * exp_max;
-    }else if (peak == 2892){
-        ymin= 0.85 * exp_min;
-        ymax= 1.4 * exp_max;
-    }else if (peak == 603){
-        ymin= 0.85 * exp_min;
-        ymax= 1.6 * exp_max;
-    }else if (peak == 686){
-        ymin= 0.65 * exp_min;
-        ymax= 2.1 * exp_max;
-    }else if (peak == 744){
-        ymin= 0.93 * exp_min;
-        ymax= 1.2 * exp_max;
-    }else if (peak == 774){
-        ymin= 0.7 * exp_min;
-        ymax= 1.8 * exp_max;
-    }else if (peak == 1085){
-        ymin= 0.93 * exp_min;
-        ymax= 1.3 * exp_max;
-    }else if (peak == 1186){
-        ymin= 0.2 * exp_min;
-        ymax= 1.55 * exp_max;
     }else{
         ymin= 0.75 * ACmin;
         ymax= 1.07 * ACmax;
     }
     
+
+    //---------------------------------------------------------------------------------------------------------------------------|
     std::stringstream bfile;
     //bfile << Output2 << "ACscript" << peak << ".bfile"; //script file includes xmgrace Angular Correlation plots
-    bfile << "ACscript" << ".bfile"; //script file includes xmgrace Angular Correlation plots
+    bfile << "ACscript_Fipps" << ".bfile"; //script file includes xmgrace Angular Correlation plots
     std::string bfilename = bfile.str();
     std::ofstream bfilebash(bfilename);
     
     if (bfilebash.is_open())
     {
-        bfilebash << "read xy \"AC" << "_0-2-0_delta_0_Ru100.dat\"" << std::endl;
-        bfilebash << "read xy \"AC" << "_1-2-0_delta_min_Ru100.dat\"" << std::endl;
-        bfilebash << "read xy \"AC" << "_2-2-0_delta_min_Ru100.dat\"" << std::endl;
-        bfilebash << "read xy \"AC" << "_3-2-0_delta_min_Ru100.dat\"" << std::endl;
-        bfilebash << "read xy \"AC" << "_4-2-0_delta_0_Ru100.dat\"" << std::endl;
-        bfilebash << "read xydy \"" << "exp.dat\"" << std::endl;
+
+        bfilebash << "read xy \"AC_Fipps" << "_0-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebash << "read xy \"AC_Fipps" << "_1-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebash << "read xy \"AC_Fipps" << "_2-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebash << "read xy \"AC_Fipps" << "_3-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebash << "read xy \"AC_Fipps" << "_4-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebash << "read xydy \"" << "exp_Fipps.dat\"" << std::endl;
         
         bfilebash << "s0 line color 1" << std::endl;
         bfilebash << "s0 linestyle 4" << std::endl;
@@ -1256,67 +1578,7 @@ int main(){
         bfilebash << "world ymin " << ymin << std::endl;
         bfilebash << "world ymax " << ymax << std::endl;
         
-        if (exp_max > 75000){
-            bfilebash << "yaxis tick major 10000" << std::endl;
-            bfilebash << "yaxis tick minor 5000" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 50000 && exp_max < 75000){
-            bfilebash << "yaxis tick major 10000" << std::endl;
-            bfilebash << "yaxis tick minor 5000" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 15000 && exp_max < 50000){
-            bfilebash << "yaxis tick major 5000" << std::endl;
-            bfilebash << "yaxis tick minor 1000" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 8000 && exp_max <= 15000){
-            bfilebash << "yaxis tick major 2000" << std::endl;
-            bfilebash << "yaxis tick minor 500" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 4000 && exp_max <= 8000){
-            bfilebash << "yaxis tick major 1000" << std::endl;
-            bfilebash << "yaxis tick minor 200" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 2000 && exp_max <= 4000){
-            bfilebash << "yaxis tick major 500" << std::endl;
-            bfilebash << "yaxis tick minor 100" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 1000 && exp_max <= 2000){
-            bfilebash << "yaxis tick major 200" << std::endl;
-            bfilebash << "yaxis tick minor 50" << std::endl;
-            bfilebash << "view 0.17, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 500 && exp_max < 1000){
-            bfilebash << "yaxis tick major 100" << std::endl;
-            bfilebash << "yaxis tick minor 50" << std::endl;
-            bfilebash << "view 0.14, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max > 250 && exp_max <= 500){
-            bfilebash << "yaxis tick major 50" << std::endl;
-            bfilebash << "yaxis tick minor 10" << std::endl;
-            bfilebash << "view 0.14, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 150 && exp_max <= 250){
-            bfilebash << "yaxis tick major 40" << std::endl;
-            bfilebash << "yaxis tick minor 20" << std::endl;
-            bfilebash << "view 0.14, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 100 && exp_max < 150){
-            bfilebash << "yaxis tick major 40" << std::endl;
-            bfilebash << "yaxis tick minor 20" << std::endl;
-            bfilebash << "view 0.14, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 60 && exp_max < 100){
-            bfilebash << "yaxis tick major 10" << std::endl;
-            bfilebash << "yaxis tick minor 5" << std::endl;
-            bfilebash << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 40 && exp_max < 60){
-            bfilebash << "yaxis tick major 10" << std::endl;
-            bfilebash << "yaxis tick minor 2" << std::endl;
-            bfilebash << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 20 && exp_max < 40){
-            bfilebash << "yaxis tick major 5" << std::endl;
-            bfilebash << "yaxis tick minor 1" << std::endl;
-            bfilebash << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 10 && exp_max < 20){
-            bfilebash << "yaxis tick major 2" << std::endl;
-            bfilebash << "yaxis tick minor 1" << std::endl;
-            bfilebash << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
-        }else if (exp_max >= 2 && exp_max < 10){
+        if (exp_max >= 2 && exp_max < 10){
             bfilebash << "yaxis tick major 1" << std::endl;
             bfilebash << "yaxis tick minor 0.5" << std::endl;
             bfilebash << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
@@ -1328,8 +1590,8 @@ int main(){
             std::cout << "Statistic for angular correlation analysis is too low or too high" << std::endl;
             return 0;
         }
-        bfilebash << "saveall \"AC_"<< ".arg\"" << std::endl;
-        bfilebash << "print to \"AC_"<< ".eps\"" << std::endl;
+        bfilebash << "saveall \"AC_Fipps"<< ".arg\"" << std::endl;
+        bfilebash << "print to \"AC_Fipps"<< ".eps\"" << std::endl;
         bfilebash << "device \"EPS\" OP \"level2\"" << std::endl;
         bfilebash << "print" << std::endl;
         
@@ -1337,9 +1599,248 @@ int main(){
     }
     else
     {
-        std::cout << "error: the file is not open";
+        std::cout << "error: the Fipps file is not open";
     }
+
+    std::stringstream bfileI;
+    //bfile << Output2 << "ACscript" << peak << ".bfile"; //script file includes xmgrace Angular Correlation plots
+    bfileI << "ACscript_Ifin" << ".bfile"; //script file includes xmgrace Angular Correlation plots
+    std::string bfilenameI = bfileI.str();
+    std::ofstream bfilebashI(bfilenameI);
     
+    if (bfilebashI.is_open())
+    {
+
+        bfilebashI << "read xy \"AC_Ifin" << "_0-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebashI << "read xy \"AC_Ifin" << "_1-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashI << "read xy \"AC_Ifin" << "_2-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashI << "read xy \"AC_Ifin" << "_3-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashI << "read xy \"AC_Ifin" << "_4-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebashI << "read xydy \"" << "exp_Ifin.dat\"" << std::endl;
+        
+        bfilebashI << "s0 line color 1" << std::endl;
+        bfilebashI << "s0 linestyle 4" << std::endl;
+        bfilebashI << "s0 linewidth 2" << std::endl;
+        bfilebashI << "s1 line color 2" << std::endl;
+        bfilebashI << "s1 linewidth 2" << std::endl;
+        bfilebashI << "s2 line color 3" << std::endl;
+        bfilebashI << "s2 linewidth 2" << std::endl;
+        bfilebashI << "s3 line color 4" << std::endl;
+        bfilebashI << "s3 linewidth 2" << std::endl;
+        bfilebashI << "s4 line color 1" << std::endl;
+        bfilebashI << "s4 linewidth 2" << std::endl;
+        
+        bfilebashI << "s5 symbol 1" << std::endl;
+        bfilebashI << "s5 linestyle 0" << std::endl;
+        bfilebashI << "s5 symbol color 1" << std::endl;
+        bfilebashI << "s5 symbol size 1.2" << std::endl;
+        bfilebashI << "s5 symbol linewidth 1.5" << std::endl;
+        bfilebashI << "s5 errorbar linewidth 1.5" << std::endl;
+        bfilebashI << "s5 errorbar color 1" << std::endl;
+        
+        bfilebashI << "s0 legend \"0-2-0 (\\xd\\0=0)\"" << std::endl;
+
+        if (c_min120 <= chi_min) {
+            bfilebashI << "s1 legend \"1-2-0 (\\xd\\0=" << delmin120 << "\\S+" << drp120-delmin120 << "\\N" << "\\s" << round((drm120-delmin120) * pow(10, 2))/pow(10, 2) << "\\N)\"" << std::endl;
+        }else{
+            bfilebashI << "s1 legend \"1-2-0 (\\xd\\0=" << delmin120 << ")\"" << std::endl;
+        }
+        if (c_min220 <= chi_min) {
+            bfilebashI << "s2 legend \"2-2-0 (\\xd\\0=" << delmin220 << "\\S+" << drp220-delmin220 << "\\N" << "\\s" << round((drm220-delmin220) * 100) / 100 << "\\N)\"" << std::endl;
+        }else{
+            bfilebashI << "s2 legend \"2-2-0 (\\xd\\0=" << delmin220 << ")\"" << std::endl;
+        }
+        if (c_min320 <= chi_min) {
+            bfilebashI << "s3 legend \"3-2-0 (\\xd\\0=" << round(delmin320 * pow(10, 2))/pow(10, 2) << "\\S+" << round((drp320-delmin320)*100)/100 << "\\N" << "\\s" << round((drm320-delmin320)*100)/100 << "\\N)\"" << std::endl;
+        }else{
+            bfilebashI << "s3 legend \"3-2-0 (\\xd\\0=" << round(delmin320 * pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        }
+        bfilebashI << "s4 legend \"4-2-0 (\\xd\\0=0)\"" << std::endl;
+
+        bfilebashI << "s5 legend \"exp " << peak << " keV\"" << std::endl; //EXPERIMENT PEAK keV
+
+        
+
+        //------------LEGEND CONFIGURATIONS---------------|
+        bfilebashI << "legend 0.49, 0.77" << std::endl;
+        bfilebashI << "legend char size 1.2" << std::endl;
+
+        //------------------------------------------------|
+        
+        
+        bfilebashI << "with string" << std::endl;
+        bfilebashI << "string on" << std::endl;
+        bfilebashI << "string loctype view" << std::endl;
+        bfilebashI << "string 0.89, 0.65" << std::endl;
+        bfilebashI << "string char size 1.6" << std::endl;
+        bfilebashI << "string def \"(1-3)\\S+\\N(0\\S+\\N)\"" << std::endl;
+        
+        bfilebashI << "with string" << std::endl;
+        bfilebashI << "string on" << std::endl;
+        bfilebashI << "string loctype view" << std::endl;
+        bfilebashI << "string 0.48, 0.44" << std::endl;
+        bfilebashI << "string char size 1.3" << std::endl;
+        bfilebashI << "string def \"gated on 658 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
+       
+        bfilebashI << "xaxis label \"Cos(\\xq\\0) \"" << std::endl;
+        bfilebashI << "xaxis label char size 1.6" << std::endl;
+        bfilebashI << "xaxis ticklabel char size 1.6" << std::endl;
+        bfilebashI << "xaxis tick major 0.5" << std::endl;
+        bfilebashI << "xaxis tick minor 0.25" << std::endl;
+        bfilebashI << "world xmin -1.2" << std::endl;
+        bfilebashI << "world xmax 1.2" << std::endl;
+        
+        bfilebashI << "yaxis label \"Counts\"" << std::endl;
+        bfilebashI << "yaxis label char size 1.6" << std::endl;
+        bfilebashI << "yaxis ticklabel char size 1.6" << std::endl;
+        
+        bfilebashI << "world ymin " << ymin << std::endl;
+        bfilebashI << "world ymax " << ymax << std::endl;
+        
+        if (exp_max >= 2 && exp_max < 10){
+            bfilebashI << "yaxis tick major 1" << std::endl;
+            bfilebashI << "yaxis tick minor 0.5" << std::endl;
+            bfilebashI << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
+        }else if (exp_max >= 0 && exp_max < 2){
+            bfilebashI << "yaxis tick major 0.5" << std::endl;
+            bfilebashI << "yaxis tick minor 0.1" << std::endl;
+            bfilebashI << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
+        }else{
+            std::cout << "Statistic for angular correlation analysis is too low or too high" << std::endl;
+            return 0;
+        }
+        bfilebashI << "saveall \"AC_Ifin"<< ".arg\"" << std::endl;
+        bfilebashI << "print to \"AC_Ifin"<< ".eps\"" << std::endl;
+        bfilebashI << "device \"EPS\" OP \"level2\"" << std::endl;
+        bfilebashI << "print" << std::endl;
+        
+        bfilebashI.close();
+    }
+    else
+    {
+        std::cout << "error: the Ifin file is not open";
+    }
+
+    std::stringstream bfileM;
+    //bfile << Output2 << "ACscript" << peak << ".bfile"; //script file includes xmgrace Angular Correlation plots
+    bfileM << "ACscript_Mix" << ".bfile"; //script file includes xmgrace Angular Correlation plots
+    std::string bfilenameM = bfileM.str();
+    std::ofstream bfilebashM(bfilenameM);
+    
+    if (bfilebashM.is_open())
+    {
+
+        bfilebashM << "read xy \"AC_Mix" << "_0-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebashM << "read xy \"AC_Mix" << "_1-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashM << "read xy \"AC_Mix" << "_2-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashM << "read xy \"AC_Mix" << "_3-2-0_delta_min_Ru100.dat\"" << std::endl;
+        bfilebashM << "read xy \"AC_Mix" << "_4-2-0_delta_0_Ru100.dat\"" << std::endl;
+        bfilebashM << "read xydy \"" << "exp_Mix.dat\"" << std::endl;
+        
+        bfilebashM << "s0 line color 1" << std::endl;
+        bfilebashM << "s0 linestyle 4" << std::endl;
+        bfilebashM << "s0 linewidth 2" << std::endl;
+        bfilebashM << "s1 line color 2" << std::endl;
+        bfilebashM << "s1 linewidth 2" << std::endl;
+        bfilebashM << "s2 line color 3" << std::endl;
+        bfilebashM << "s2 linewidth 2" << std::endl;
+        bfilebashM << "s3 line color 4" << std::endl;
+        bfilebashM << "s3 linewidth 2" << std::endl;
+        bfilebashM << "s4 line color 1" << std::endl;
+        bfilebashM << "s4 linewidth 2" << std::endl;
+        
+        bfilebashM << "s5 symbol 1" << std::endl;
+        bfilebashM << "s5 linestyle 0" << std::endl;
+        bfilebashM << "s5 symbol color 1" << std::endl;
+        bfilebashM << "s5 symbol size 1.2" << std::endl;
+        bfilebashM << "s5 symbol linewidth 1.5" << std::endl;
+        bfilebashM << "s5 errorbar linewidth 1.5" << std::endl;
+        bfilebashM << "s5 errorbar color 1" << std::endl;
+        
+        bfilebashM << "s0 legend \"0-2-0 (\\xd\\0=0)\"" << std::endl;
+
+        if (c_min120 <= chi_min) {
+            bfilebashM << "s1 legend \"1-2-0 (\\xd\\0=" << delmin120 << "\\S+" << drp120-delmin120 << "\\N" << "\\s" << round((drm120-delmin120) * pow(10, 2))/pow(10, 2) << "\\N)\"" << std::endl;
+        }else{
+            bfilebashM << "s1 legend \"1-2-0 (\\xd\\0=" << delmin120 << ")\"" << std::endl;
+        }
+        if (c_min220 <= chi_min) {
+            bfilebashM << "s2 legend \"2-2-0 (\\xd\\0=" << delmin220 << "\\S+" << drp220-delmin220 << "\\N" << "\\s" << round((drm220-delmin220) * 100) / 100 << "\\N)\"" << std::endl;
+        }else{
+            bfilebashM << "s2 legend \"2-2-0 (\\xd\\0=" << delmin220 << ")\"" << std::endl;
+        }
+        if (c_min320 <= chi_min) {
+            bfilebashM << "s3 legend \"3-2-0 (\\xd\\0=" << round(delmin320 * pow(10, 2))/pow(10, 2) << "\\S+" << round((drp320-delmin320)*100)/100 << "\\N" << "\\s" << round((drm320-delmin320)*100)/100 << "\\N)\"" << std::endl;
+        }else{
+            bfilebashM << "s3 legend \"3-2-0 (\\xd\\0=" << round(delmin320 * pow(10, 2))/pow(10, 2) << ")\"" << std::endl;
+        }
+        bfilebashM << "s4 legend \"4-2-0 (\\xd\\0=0)\"" << std::endl;
+
+        bfilebashM << "s5 legend \"exp " << peak << " keV\"" << std::endl; //EXPERIMENT PEAK keV
+
+        
+
+        //------------LEGEND CONFIGURATIONS---------------|
+        bfilebashM << "legend 0.49, 0.77" << std::endl;
+        bfilebashM << "legend char size 1.2" << std::endl;
+
+        //------------------------------------------------|
+        
+        
+        bfilebashM << "with string" << std::endl;
+        bfilebashM << "string on" << std::endl;
+        bfilebashM << "string loctype view" << std::endl;
+        bfilebashM << "string 0.89, 0.65" << std::endl;
+        bfilebashM << "string char size 1.6" << std::endl;
+        bfilebashM << "string def \"(1-3)\\S+\\N(0\\S+\\N)\"" << std::endl;
+        
+        bfilebashM << "with string" << std::endl;
+        bfilebashM << "string on" << std::endl;
+        bfilebashM << "string loctype view" << std::endl;
+        bfilebashM << "string 0.48, 0.44" << std::endl;
+        bfilebashM << "string char size 1.3" << std::endl;
+        bfilebashM << "string def \"gated on 658 keV \\xg\\0 ray (Ru-100)\"" << std::endl;
+       
+        bfilebashM << "xaxis label \"Cos(\\xq\\0) \"" << std::endl;
+        bfilebashM << "xaxis label char size 1.6" << std::endl;
+        bfilebashM << "xaxis ticklabel char size 1.6" << std::endl;
+        bfilebashM << "xaxis tick major 0.5" << std::endl;
+        bfilebashM << "xaxis tick minor 0.25" << std::endl;
+        bfilebashM << "world xmin -1.2" << std::endl;
+        bfilebashM << "world xmax 1.2" << std::endl;
+        
+        bfilebashM << "yaxis label \"Counts\"" << std::endl;
+        bfilebashM << "yaxis label char size 1.6" << std::endl;
+        bfilebashM << "yaxis ticklabel char size 1.6" << std::endl;
+        
+        bfilebashM << "world ymin " << ymin << std::endl;
+        bfilebashM << "world ymax " << ymax << std::endl;
+        
+        if (exp_max >= 2 && exp_max < 10){
+            bfilebashM << "yaxis tick major 1" << std::endl;
+            bfilebashM << "yaxis tick minor 0.5" << std::endl;
+            bfilebashM << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
+        }else if (exp_max >= 0 && exp_max < 2){
+            bfilebashM << "yaxis tick major 0.5" << std::endl;
+            bfilebashM << "yaxis tick minor 0.1" << std::endl;
+            bfilebashM << "view 0.11, 0.13, 1.26, 0.8" << std::endl;
+        }else{
+            std::cout << "Statistic for angular correlation analysis is too low or too high" << std::endl;
+            return 0;
+        }
+        bfilebashM << "saveall \"AC_Mix"<< ".arg\"" << std::endl;
+        bfilebashM << "print to \"AC_Mix"<< ".eps\"" << std::endl;
+        bfilebashM << "device \"EPS\" OP \"level2\"" << std::endl;
+        bfilebashM << "print" << std::endl;
+        
+        bfilebashM.close();
+    }
+    else
+    {
+        std::cout << "error: the Mixed file is not open";
+    }
+
+    //-------------------------------------------------------------------------------------------------------------------|
     float yminchi=0;
     float ymaxchi=0;
 
@@ -1462,9 +1963,19 @@ int main(){
     if (bbashAChi.is_open())
     {
         bbashAChi << "xmgrace -batch Chiscript" << ".bfile -nosafe -hardcopy" << std::endl;
-        bbashAChi << "xmgrace -batch ACscript" << ".bfile -nosafe -hardcopy" << std::endl;
-        bbashAChi << "ps2pdf" << " AC_" << ".eps" << std::endl;
-        bbashAChi << "pdfcrop" << " AC_" << ".pdf" << std::endl;
+        bbashAChi << "xmgrace -batch ACscript_Fipps" << ".bfile -nosafe -hardcopy" << std::endl;
+        bbashAChi << "xmgrace -batch ACscript_Ifin" << ".bfile -nosafe -hardcopy" << std::endl;
+        bbashAChi << "xmgrace -batch ACscript_Mix" << ".bfile -nosafe -hardcopy" << std::endl;
+
+        bbashAChi << "ps2pdf" << " AC_Fipps" << ".eps" << std::endl;
+        bbashAChi << "pdfcrop" << " AC_Fipps" << ".pdf" << std::endl;
+
+        bbashAChi << "ps2pdf" << " AC_Ifin" << ".eps" << std::endl;
+        bbashAChi << "pdfcrop" << " AC_Ifin" << ".pdf" << std::endl;
+
+        bbashAChi << "ps2pdf" << " AC_Mix" << ".eps" << std::endl;
+        bbashAChi << "pdfcrop" << " AC_Mix" << ".pdf" << std::endl;
+
         bbashAChi << "ps2pdf" << " Chi_" << ".eps" << std::endl;
         bbashAChi << "pdfcrop" << " Chi_" << ".pdf" << std::endl;
 
@@ -1480,3 +1991,8 @@ int main(){
    return 0;    
  }    
     
+
+
+
+
+
