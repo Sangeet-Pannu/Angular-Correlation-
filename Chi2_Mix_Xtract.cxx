@@ -239,10 +239,10 @@ int main(){
 
     std::cout << exp_max << " " << exp_min << std::endl;
 
-    std::stringstream cfilename;
+    std::stringstream cfilename1;
     std::stringstream cfilename2;
     std::stringstream cfilename3;
-        
+        /*
         cfilename << "exp.dat";
         std::string cname = cfilename.str();
         
@@ -259,7 +259,7 @@ int main(){
  
         }
         cfile.close();
-
+*/
         cfilename1 << "exp_Fipps.dat";
         std::string cname1 = cfilename1.str();
         
@@ -268,9 +268,8 @@ int main(){
         {
     
                 for(int i = 0; i<21; i++){
-                    if(i<21)cfile1 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=21 && i<50 )cfile << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=50)cfile1 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    cfile1 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                   
                 }
      
  
@@ -285,9 +284,9 @@ int main(){
         {
     
                 for(int i = 21; i<50; i++){
-                    if(i<21)cfile2 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=21 && i<50 )cfile2 << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=50)cfile2 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                   
+                    cfile2 << cos(I_angs[i-21]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                    
                 }
      
  
@@ -302,9 +301,8 @@ int main(){
         {
     
                 for(int i = 50; i<106; i++){
-                    if(i<21)cfile3 << cos(F_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=21 && i<50 )cfile3 << cos(I_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
-                    if(i>=50)cfile3 << cos(M_angs[i]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
+                 
+                    cfile3 << cos(M_angs[i-50]) << " " << y[i+2] << " " << yr[i+2] << std::endl;
                 }
      
  
@@ -618,8 +616,8 @@ int main(){
             for (d1 = delmin120; d1 <= 51.000; d1 += 0.010){
                 ChiSquare2 = 0;
                 
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -681,8 +679,8 @@ int main(){
             }
             for (d1 = delmin120; d1 >= -51.000; d1 += -0.010){
                 ChiSquare2 = 0;
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -744,8 +742,8 @@ int main(){
         }else if (J1 == 2 && J2 == 2 && J3 == 0) {
             for (d1 = delmin220; d1 <= 52.000; d1 += 0.010){
                 ChiSquare2 = 0;
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -805,8 +803,8 @@ int main(){
             }
             for (d1 = delmin220; d1 >= -52.00; d1 += -0.010){
                 ChiSquare2 = 0;
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -868,8 +866,8 @@ int main(){
         }else if (J1 == 3 && J2 == 2 && J3 == 0) {
             for (d1 = delmin320; d1 <= 51.000; d1 += 0.010){
                 ChiSquare2 = 0;
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -931,8 +929,8 @@ int main(){
             }
             for (d1 = delmin320; d1 >= -51.000; d1 += -0.010){
                 ChiSquare2 = 0;
-                a2=0;
-                a4=0;
+                float a2=0;
+                float a4=0;
                 loopc = 0;
 
                 //Definition of the theoritcal angular correlation results.
@@ -1227,8 +1225,8 @@ int main(){
                 double wcoeff2M = 0;
 
                 double wcoeffF = 0;
-                double wcoeffI = 0
-                double wcoeffM = 0
+                double wcoeffI = 0;
+                double wcoeffM = 0;
 
                 for(int i = 0; i<21; i++) wcoeff1F +=  (y[i+2]*Wtheo[i]/pow(yr[i+2],2));
                 for(int i = 0; i<21; i++) wcoeff2F +=  pow(Wtheo[i]/yr[i+2],2);
@@ -1253,8 +1251,8 @@ int main(){
                 double wcoeff2M_0 = 0;
 
                 double wcoeffF_0 = 0;
-                double wcoeffI_0 = 0
-                double wcoeffM_0 = 0
+                double wcoeffI_0 = 0;
+                double wcoeffM_0 = 0;
 
                 for(int i = 0; i<21; i++) wcoeff1F_0 +=  (y[i+2]*Wtheo_0[i]/pow(yr[i+2],2));
                 for(int i = 0; i<21; i++) wcoeff2F_0 +=  pow(Wtheo_0[i]/yr[i+2],2);
